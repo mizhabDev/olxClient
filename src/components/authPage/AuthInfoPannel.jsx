@@ -1,6 +1,7 @@
+import { AlertTriangle } from "lucide-react";
 import React from "react";
 
-const AuthInfoPanel = () => (
+const AuthInfoPanel = ({error}) => (
   <div className="hidden lg:flex flex-col justify-between w-1/2 p-10 bg-gradient-to-br from-white/5 to-transparent relative overflow-hidden">
         
     <div className="z-10">
@@ -17,6 +18,19 @@ const AuthInfoPanel = () => (
       <p className="text-gray-300 text-lg leading-relaxed max-w-md">
         Join millions of users buying and selling everything from electronics to furniture.
       </p>
+
+
+      {/* 🔴 Error message appears here */}
+      {error && (
+        <div className="mt-6 flex items-start gap-3 rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 animate-shake">
+          <AlertTriangle className="text-red-400 mt-0.5" size={20} />
+          <p className="text-sm text-red-300 leading-relaxed">
+            {error}
+          </p>
+        </div>
+      )}
+
+
     </div>
     <div className="grid grid-cols-3 gap-6 mt-12 pt-12 border-t border-white/10">
       <div>

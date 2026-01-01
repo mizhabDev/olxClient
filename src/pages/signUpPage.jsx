@@ -1,13 +1,16 @@
 import React, { useState } from "react";
 import AuthInfoPanel from "../components/authPage/AuthInfoPannel";
+import { useNavigate } from "react-router-dom";
 
 
-const SignUpPage = ({ onNavigateToLogin }) => {
+const SignUpPage = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState(null);
+  const navigate = useNavigate();
+
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -127,7 +130,8 @@ const SignUpPage = ({ onNavigateToLogin }) => {
 
             <p className="mt-8 text-center text-sm text-gray-400">
               Already have an account?{" "}
-              <button onClick={onNavigateToLogin} className="text-orange-500 hover:text-orange-400 font-semibold">
+              <button type="button"
+                onClick={() => navigate("/login")} className="text-orange-500 hover:text-orange-400 font-semibold cursor-pointer">
                 Log In
               </button>
             </p>

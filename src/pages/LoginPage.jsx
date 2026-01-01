@@ -1,19 +1,107 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
 import AuthInfoPanel from "../components/authPage/AuthInfoPannel";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
+import ForgotPasswordModal from "../components/authPage/ForgetPasswordModal";
 
-const LoginPage = ({ onNavigateToSignUp }) => {
+const LoginPage = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [showPassword, setShowPassword] = useState(false);
+    const [authError, setAuthError] = useState("");
 
-    const handleSubmit = (e) => {
+
+    // forget password modal handling 
+    const [showForgotModal, setShowForgotModal] = useState(false);
+    const [forgotStatus, setForgotStatus] = useState(""); // success / error message
+    const [loadingForgot, setLoadingForgot] = useState(false);
+
+
+    const navigate = useNavigate();
+
+
+    useEffect(() => {
+        if (!authError) return;
+
+        const timer = setTimeout(() => {
+            setAuthError("");
+        }, 3000);
+
+        return () => clearTimeout(timer);
+    }, [authError]);
+
+
+
+
+
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        console.log("Login attempt:", { email, password });
-        // login logic
 
+        try {
+            const res = await axios.post(
+                "http://localhost:4000/api/auth/login",
+                {
+                    email,
+                    password,
+                },
+                {
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    withCredentials: true,
+                }
+            );
+
+            console.log("Login success:", res.data);
+
+            //save token
+
+
+        } catch (err) {
+            console.error("Login failed:", err);
+
+            if (err.response?.data?.message) {
+                setAuthError(err.response.data.message);
+            } else {
+                setAuthError("Something went wrong. Please try again.");
+            }
+        }
 
     };
+
+
+    const handleForgotPassword = async () => {
+        setLoadingForgot(true);
+        setForgotStatus("");
+
+        try {
+            const res = await axios.post(
+                "http://localhost:4000/api/auth/forgetPassword",
+                { email }
+            );
+
+            setForgotStatus(res.data.message || "Reset link sent.");
+
+            // auto-close after 4s
+            setTimeout(() => {
+                setShowForgotModal(false);
+                setForgotStatus("");
+            }, 4000);
+        } catch (err) {
+            setForgotStatus(
+                err.response?.data?.message ||
+                "Failed to send reset email."
+            );
+        } finally {
+            setLoadingForgot(false);
+        }
+    };
+
+
+
+
+
 
     return (
 
@@ -22,7 +110,8 @@ const LoginPage = ({ onNavigateToSignUp }) => {
                 {/* ... rest of your code ... */}
 
 
-                <AuthInfoPanel />
+                <AuthInfoPanel error={authError} />
+
 
                 <div className="w-full lg:w-1/2 p-8 md:p-10 bg-[#0f172a]/40 flex flex-col justify-center">
                     <div className="max-w-md mx-auto w-full">
@@ -66,7 +155,14 @@ const LoginPage = ({ onNavigateToSignUp }) => {
                             </div>
 
                             <div className="flex justify-end">
-                                <a href="#" className="text-sm text-blue-400 hover:text-blue-300 transition-colors">Forgot Password?</a>
+                                <button
+                                    type="button"
+                                    onClick={() => setShowForgotModal(true)}
+                                    className="text-sm text-blue-400 hover:text-blue-300 transition-colors cursor-pointer"
+                                >
+                                    Forgot Password?
+                                </button>
+
                             </div>
 
                             <button type="submit" className="w-full py-3.5 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-400 hover:to-orange-500 text-white font-bold rounded-xl shadow-lg shadow-orange-500/20 transform transition-all duration-200 hover:-translate-y-0.5">
@@ -82,7 +178,12 @@ const LoginPage = ({ onNavigateToSignUp }) => {
                             <div className="flex-1 border-t border-slate-700"></div>
                         </div>
 
-                        <button className="w-full py-3.5 bg-[#1e293b]/50 hover:bg-[#1e293b] border border-slate-700 hover:border-slate-600 text-white font-medium rounded-xl flex items-center justify-center gap-3 transition-all duration-200 group">
+                        <button className="w-full py-3.5 bg-[#1e293b]/50 hover:bg-[#1e293b] border border-slate-700 hover:border-slate-600 text-white font-medium rounded-xl flex items-center justify-center gap-3 transition-all duration-200 group"
+                            onClick={() => {
+                                window.location.href = "http://localhost:4000/api/auth/google";
+                            }}
+                        >
+
                             <svg
                                 className="w-5 h-5 group-hover:scale-110 transition-transform"
                                 viewBox="0 0 24 24"
@@ -111,17 +212,41 @@ const LoginPage = ({ onNavigateToSignUp }) => {
 
                         <p className="mt-8 text-center text-sm text-gray-400">
                             Don't have an account?{" "}
-                            <button onClick={onNavigateToSignUp} className="text-orange-500 hover:text-orange-400 font-semibold">
+                            <button type="button"
+                                onClick={() => navigate("/signup")} className="text-orange-500 hover:text-orange-400 font-semibold cursor-pointer">
                                 Sign Up
                             </button>
                         </p>
                     </div>
+
+
                 </div>
             </div>
+
+            {showForgotModal && (
+                <ForgotPasswordModal
+                    email={email}
+                    loading={loadingForgot}
+                    message={forgotStatus}
+                    onClose={() => setShowForgotModal(false)}
+                    onSend={handleForgotPassword}
+                />
+            )}
+
+
         </div>
 
 
+
+
+
+
+
+
     );
+
+
+
 };
 
 export default LoginPage;

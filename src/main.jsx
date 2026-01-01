@@ -7,10 +7,13 @@ import Home from "./pages/Home";
 import "./index.css";
 import LoginPage from "./pages/LoginPage.jsx";
 import SignUpPage from "./pages/signUpPage.jsx";
+import SellPage from "./pages/SellPage.jsx";
+import GoogleAuth from "./pages/GoogleAuth.jsx";
+import ResetPasswordPage from "./pages/ResetPasswordPage.jsx";
 
 const router = createBrowserRouter([
   {
-    element: <App />, 
+    element: <App />,
     children: [
       {
         path: "/",
@@ -22,12 +25,24 @@ const router = createBrowserRouter([
       },
       {
         path: "/login",
-        element: <LoginPage/>,
+        element: <LoginPage />,
       },
       {
         path: "/signup",
         element: <SignUpPage />,
-      }
+      },
+      {
+        path: "/sell",
+        element: <SellPage />,
+      },
+      {
+        path: "/oauth-success",
+        element: <GoogleAuth />,
+      },
+      {
+        path: "/reset-password/:token",
+        element: <ResetPasswordPage />,
+      },
     ],
   },
 ]);
