@@ -10,6 +10,7 @@ import SignUpPage from "./pages/signUpPage.jsx";
 import SellPage from "./pages/SellPage.jsx";
 import GoogleAuth from "./pages/GoogleAuth.jsx";
 import ResetPasswordPage from "./pages/ResetPasswordPage.jsx";
+import ProductDetailPage from "./pages/ProductDetailPage.jsx";
 
 const router = createBrowserRouter([
   {
@@ -42,6 +43,10 @@ const router = createBrowserRouter([
       {
         path: "/reset-password/:token",
         element: <ResetPasswordPage />,
+      },
+      {
+        path: "/product/:productId",
+        element: <ProductDetailPage />,
       },
     ],
   },

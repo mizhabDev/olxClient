@@ -67,7 +67,8 @@ const SellPage = () => {
         formData.append("productPrice", price);
         formData.append("productLocation", location);
         formData.append("productCatogery", category); // ⚠️ spelling matters
-        
+        formData.append("productDescription", description);
+
         // files
         images.forEach((img) => {
             formData.append("productImage", img.file);

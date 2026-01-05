@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 import ProductCard from '../components/ProductCard';
-import ProductModal from '../components/ProductModal';
 import Layout from '../components/homepage/Layout';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
@@ -16,8 +16,8 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 const CATEGORIES = ['All', 'Electronics', 'Vehicles', 'Furniture', 'Fashion', 'Properties'];
 
 const Home = () => {
+  const navigate = useNavigate();
   const [products, setProducts] = useState([]);
-  const [selectedProductId, setSelectedProductId] = useState(null);
   const [activeCategory, setActiveCategory] = useState("All");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -58,6 +58,11 @@ const Home = () => {
       ? products
       : products.filter((p) => p.category === activeCategory
       );
+
+  // ✅ Navigate to product detail page
+  const handleProductClick = (productId) => {
+    navigate(`/product/${productId}`);
+  };
 
 
   // ✅ Loader handling 
@@ -109,17 +114,10 @@ const Home = () => {
             <ProductCard
               key={product._id}
               product={product}
-              onClick={(id) => setSelectedProductId(id)}
+              onClick={handleProductClick}
             />
           ))}
         </div>
-
-        {/* Product Modal */}
-        <ProductModal
-          productId={selectedProductId}
-          isOpen={!!selectedProductId}
-          onClose={() => setSelectedProductId(null)}
-        />
       </Layout>
       <Footer />
     </>
