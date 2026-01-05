@@ -1,7 +1,9 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import AuthInfoPanel from "../components/authPage/AuthInfoPannel";
+import OtpModal from "../components/authPage/OtpModal";
 import { useNavigate } from "react-router-dom";
-
+import axios from "axios";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 const SignUpPage = () => {
   const [name, setName] = useState("");
@@ -9,10 +11,28 @@ const SignUpPage = () => {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState(null);
+  const [showOtpModal, setShowOtpModal] = useState(false);
+  const [isSendingOtp, setIsSendingOtp] = useState(false);
   const navigate = useNavigate();
+  const [otpMessage, setOtpMessage] = useState("");
+  const [otpSuccessMessage, setOtpSuccessMessage] = useState("");
 
 
-  const handleSubmit = (e) => {
+
+
+  useEffect(() => {
+    if (!error) return;
+
+    const timer = setTimeout(() => {
+      setError("");
+    }, 3000);
+
+    return () => clearTimeout(timer);
+  }, [error]);
+
+
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError(null);
     if (password !== confirmPassword) {
@@ -20,23 +40,93 @@ const SignUpPage = () => {
       return;
     }
     console.log("Sign Up attempt:", { name, email, password });
+
+    // Show modal immediately with loading state
+    setShowOtpModal(true);
+    setIsSendingOtp(true);
+
+    try {
+
+      const res = await axios.post(
+        `${API_BASE_URL}/api/auth/register`,
+        {
+          name,
+          email,
+          password,
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+          withCredentials: true,
+        }
+      );
+
+      console.log("sign up success:", res.data);
+      setOtpMessage(res.data.message || "OTP sent successfully");
+      setIsSendingOtp(false); // Show OTP form after success
+
+    } catch (error) {
+      console.error("Sign up failed:", error);
+      setIsSendingOtp(false);
+      setShowOtpModal(false); // Close modal on error
+
+      if (error.response?.data?.message) {
+        setError(error.response.data.message);
+      } else {
+        setError("Something went wrong. Please try again.");
+      }
+    }
   };
+
+  const handleVerifyOtp = async (otp) => {
+    // Add your OTP verification API call here
+    const res = await axios.post(
+      `${API_BASE_URL}/api/auth/verifyOtp`,
+      {
+        email,
+        otp,
+      },
+      {
+        headers: {
+          "Content-Type": "application/json",
+        },
+        withCredentials: true,
+      }
+    );
+    console.log("OTP verified:", res.data);
+    setOtpSuccessMessage(res.data.message);
+    setTimeout(() => {
+      setShowOtpModal(false);
+      navigate("/login");
+    }, 2000);
+  };
+
+
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4">
+      {/* OTP Modal */}
+      <OtpModal
+        isOpen={showOtpModal}
+        onClose={() => {
+          setShowOtpModal(false);
+          setIsSendingOtp(false);
+        }}
+        onVerify={handleVerifyOtp}
+        email={email}
+        isSendingOtp={isSendingOtp}
+        message={otpMessage}
+        successMessage={otpSuccessMessage}
+      />
+
       <div className="relative z-10 w-full max-w-4xl mx-auto flex rounded-3xl overflow-hidden glass-panel border border-white/10 bg-[#000814]/5 backdrop-blur-xl shadow-2xl">
 
 
-        <AuthInfoPanel />
+        <AuthInfoPanel error={error} />
 
         <div className="w-full lg:w-1/2 p-8 md:p-10 bg-[#0f172a]/40 flex flex-col justify-center">
           <div className="max-w-md mx-auto w-full">
-
-            {error && (
-              <div className="mb-6 p-4 rounded-lg bg-red-500/10 border border-red-500/20 text-red-200 text-sm flex items-center">
-                <span className="mr-2">⚠️</span> {error}
-              </div>
-            )}
 
             <form onSubmit={handleSubmit} className="space-y-5">
               <div className="space-y-2">
@@ -100,7 +190,9 @@ const SignUpPage = () => {
               <div className="flex-1 border-t border-slate-700"></div>
             </div>
 
-            <button className="w-full py-3.5 bg-[#1e293b]/50 hover:bg-[#1e293b] border border-slate-700 hover:border-slate-600 text-white font-medium rounded-xl flex items-center justify-center gap-3 transition-all duration-200 group">
+            <button onClick={() => {
+              window.location.href = "http://localhost:4000/api/auth/google";
+            }} className="w-full py-3.5 bg-[#1e293b]/50 hover:bg-[#1e293b] border border-slate-700 hover:border-slate-600 text-white font-medium rounded-xl flex items-center justify-center gap-3 transition-all duration-200 group">
               <svg
                 className="w-5 h-5 group-hover:scale-110 transition-transform"
                 viewBox="0 0 24 24"

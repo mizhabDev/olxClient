@@ -1,12 +1,17 @@
 import React, { useState, useRef } from "react";
 import { Camera, Upload, X, ChevronDown, AlertTriangle } from "lucide-react";
 import Navbar from "../components/Navbar";
+import axios from "axios";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
+
 
 const SellPage = () => {
     const [productName, setProductName] = useState("");
     const [category, setCategory] = useState("");
     const [description, setDescription] = useState("");
     const [price, setPrice] = useState("");
+    const [location, setLocation] = useState("");
     const [images, setImages] = useState([]);
     const [isCategoryOpen, setIsCategoryOpen] = useState(false);
     const fileInputRef = useRef(null);
@@ -52,19 +57,40 @@ const SellPage = () => {
         e.preventDefault();
     };
 
-    const handleSubmit = (e, isDraft = false) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        const formData = {
-            productName,
-            category,
-            description,
-            price,
-            images,
-            isDraft
-        };
-        console.log("Submitting:", formData);
-        // TODO: API call to submit product
+
+        const formData = new FormData();
+
+        // text fields (EXACT names)
+        formData.append("productName", productName);
+        formData.append("productPrice", price);
+        formData.append("productLocation", location);
+        formData.append("productCatogery", category); // ⚠️ spelling matters
+        
+        // files
+        images.forEach((img) => {
+            formData.append("productImage", img.file);
+        });
+
+        try {
+            const res = await axios.post(
+                `${API_BASE_URL}/api/product`,
+                formData,
+                {
+                    withCredentials: true, // 🔑 SEND COOKIE
+                }
+            );
+
+            console.log("Product created:", res.data);
+        } catch (error) {
+            console.error(
+                "Error submitting product:",
+                error.response?.data || error.message
+            );
+        }
     };
+
 
     return (
         <div className="min-h-screen">
@@ -76,7 +102,7 @@ const SellPage = () => {
                     Upload Your Product
                 </h1>
 
-                <form onSubmit={(e) => handleSubmit(e, false)} className="space-y-6">
+                <form onSubmit={handleSubmit} className="space-y-6">
                     {/* Product Name */}
                     <div>
                         <input
@@ -145,6 +171,18 @@ const SellPage = () => {
                         />
                     </div>
 
+                    {/* Location */}
+                    <div>
+                        <input
+                            type="text"
+                            placeholder="Location (e.g., Kerala, Mumbai)"
+                            value={location}
+                            onChange={(e) => setLocation(e.target.value)}
+                            className="w-full bg-[#1e293b]/50 border border-slate-700 rounded-xl px-5 py-3.5 text-white placeholder-gray-400 focus:outline-none focus:border-orange-500/50 focus:ring-1 focus:ring-orange-500/50 transition-all"
+                            required
+                        />
+                    </div>
+
                     {/* Photos Section */}
                     <div>
                         <label className="text-white font-medium mb-3 block">Photos</label>
@@ -203,20 +241,13 @@ const SellPage = () => {
                         </div>
                     </div>
 
-                    {/* Action Buttons */}
-                    <div className="flex flex-col sm:flex-row gap-4 pt-4">
+                    {/* Action Button */}
+                    <div className="pt-4">
                         <button
                             type="submit"
-                            className="flex-1 py-3.5 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-400 hover:to-orange-500 text-white font-bold rounded-xl shadow-lg shadow-orange-500/20 transform transition-all duration-200 hover:-translate-y-0.5"
+                            className="w-full py-3.5 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-400 hover:to-orange-500 text-white font-bold rounded-xl shadow-lg shadow-orange-500/20 transform transition-all duration-200 hover:-translate-y-0.5"
                         >
                             Publish Listing
-                        </button>
-                        <button
-                            type="button"
-                            onClick={(e) => handleSubmit(e, true)}
-                            className="flex-1 py-3.5 bg-[#1e293b]/50 border border-slate-700 hover:bg-[#1e293b] hover:border-slate-600 text-white font-medium rounded-xl transition-all duration-200"
-                        >
-                            Save as Draft
                         </button>
                     </div>
                 </form>

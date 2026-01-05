@@ -4,6 +4,7 @@ import AuthInfoPanel from "../components/authPage/AuthInfoPannel";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import ForgotPasswordModal from "../components/authPage/ForgetPasswordModal";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 const LoginPage = () => {
     const [email, setEmail] = useState("");
@@ -16,6 +17,7 @@ const LoginPage = () => {
     const [showForgotModal, setShowForgotModal] = useState(false);
     const [forgotStatus, setForgotStatus] = useState(""); // success / error message
     const [loadingForgot, setLoadingForgot] = useState(false);
+    
 
 
     const navigate = useNavigate();
@@ -40,7 +42,7 @@ const LoginPage = () => {
 
         try {
             const res = await axios.post(
-                "http://localhost:4000/api/auth/login",
+                `${API_BASE_URL}/api/auth/login`,
                 {
                     email,
                     password,
@@ -55,7 +57,6 @@ const LoginPage = () => {
 
             console.log("Login success:", res.data);
 
-            //save token
 
 
         } catch (err) {
@@ -77,7 +78,7 @@ const LoginPage = () => {
 
         try {
             const res = await axios.post(
-                "http://localhost:4000/api/auth/forgetPassword",
+                `${API_BASE_URL}/api/auth/forgetPassword`,
                 { email }
             );
 
@@ -235,18 +236,7 @@ const LoginPage = () => {
 
 
         </div>
-
-
-
-
-
-
-
-
     );
-
-
-
 };
 
 export default LoginPage;

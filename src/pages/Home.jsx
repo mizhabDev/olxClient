@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import ProductCard from '../components/ProductCard';
 import ProductModal from '../components/ProductModal';
@@ -6,108 +6,77 @@ import Layout from '../components/homepage/Layout';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import HeroBanner from '../components/homepage/HeroBanner';
+import LogoAnimation from '../loading/LoadingAnimation';
+import axios from 'axios';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 
 
-// Mock Data
-const MOCK_PRODUCTS = [
-  {
-    id: '1',
-    title: 'MacBook Pro M2 14"',
-    price: 1850,
-    category: 'Electronics',
-    description: 'Brand new sealed MacBook Pro M2 with 16GB RAM and 512GB SSD. Space Gray color. Warranty valid until Dec 2025.',
-    location: 'New York, NY',
-    postedTime: '2 hours ago',
-    images: [
-      'https://images.unsplash.com/photo-1517336714731-489689fd1ca4?ixlib=rb-1.2.1&auto=format&fit=crop&w=1000&q=80',
-      'https://images.unsplash.com/photo-1611186871348-b1ce696e52c9?ixlib=rb-1.2.1&auto=format&fit=crop&w=1000&q=80'
-    ],
-    seller: {
-      id: 'u1',
-      name: 'Alex Johnson',
-      email: 'alex@example.com',
-      phone: '+1 234 567 890',
-      avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
-      location: 'Brooklyn, NY',
-      joinDate: 'Mar 2023'
-    }
-  },
-  {
-    id: '2',
-    title: 'Tesla Model 3 Performance',
-    price: 45000,
-    category: 'Vehicles',
-    description: '2022 Tesla Model 3 Performance. Red Multi-Coat. Full Self-Driving capability included. 15k miles.',
-    location: 'Los Angeles, CA',
-    postedTime: '5 hours ago',
-    images: [
-      'https://images.unsplash.com/photo-1560958089-b8a1929cea89?ixlib=rb-1.2.1&auto=format&fit=crop&w=1000&q=80',
-      'https://images.unsplash.com/photo-1536700503339-1e4b06520771?ixlib=rb-1.2.1&auto=format&fit=crop&w=1000&q=80'
-    ],
-    seller: {
-      id: 'u2',
-      name: 'Sarah Connor',
-      email: 'sarah@example.com',
-      phone: '+1 987 654 321',
-      avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
-      location: 'Los Angeles, CA',
-      joinDate: 'Jan 2022'
-    }
-  },
-  {
-    id: '3',
-    title: 'Modern Leather Sofa',
-    price: 850,
-    category: 'Furniture',
-    description: 'Italian leather sofa in excellent condition. 3-seater. Cognac color. Moving sale.',
-    location: 'Chicago, IL',
-    postedTime: '1 day ago',
-    images: [
-      'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?ixlib=rb-1.2.1&auto=format&fit=crop&w=1000&q=80'
-    ],
-    seller: {
-      id: 'u3',
-      name: 'Mike Ross',
-      email: 'mike@example.com',
-      phone: '+1 111 222 333',
-      avatar: 'https://images.unsplash.com/photo-1599566150163-29194dcaad36?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
-      location: 'Chicago, IL',
-      joinDate: 'Jun 2021'
-    }
-  },
-  {
-    id: '4',
-    title: 'Sony A7IV Camera Body',
-    price: 2200,
-    category: 'Electronics',
-    description: 'Like new Sony A7IV. Shutter count < 5000. Comes with original box and accessories.',
-    location: 'San Francisco, CA',
-    postedTime: '30 mins ago',
-    images: [
-      'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?ixlib=rb-1.2.1&auto=format&fit=crop&w=1000&q=80'
-    ],
-    seller: {
-      id: 'u4',
-      name: 'Emily Blunt',
-      email: 'emily@example.com',
-      phone: '+1 555 666 777',
-      avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
-      location: 'San Francisco, CA',
-      joinDate: 'Sep 2023'
-    }
-  },
-];
 
 const CATEGORIES = ['All', 'Electronics', 'Vehicles', 'Furniture', 'Fashion', 'Properties'];
 
 const Home = () => {
-  const [selectedProduct, setSelectedProduct] = useState(null);
-  const [activeCategory, setActiveCategory] = useState('All');
+  const [products, setProducts] = useState([]);
+  const [selectedProductId, setSelectedProductId] = useState(null);
+  const [activeCategory, setActiveCategory] = useState("All");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  const filteredProducts = activeCategory === 'All'
-    ? MOCK_PRODUCTS
-    : MOCK_PRODUCTS.filter(p => p.category === activeCategory);
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        setLoading(true);
+
+        const res = await axios.get(
+
+          `${API_BASE_URL}/api/page/homePage`,
+          {
+            withCredentials: true, // 🔑 SEND COOKIE
+          }
+        );
+
+        console.log(res.data);
+        setProducts(res.data);
+        setLoading(false);
+
+      } catch (err) {
+        console.log("Error fetching products:", err);
+        setError("Failed to fetch products.");
+        setLoading(false);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, []);
+
+
+  // ✅ Category filter
+  const filteredProducts =
+    activeCategory === "All"
+      ? products
+      : products.filter((p) => p.category === activeCategory
+      );
+
+
+  // ✅ Loader handling 
+
+  if (loading) {
+    return <LogoAnimation />
+  }
+
+
+  // ✅ Error handling
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center text-red-500">
+        {error}
+      </div>
+    );
+  }
+
+
 
   return (
     <>
@@ -138,18 +107,18 @@ const Home = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {filteredProducts.map((product) => (
             <ProductCard
-              key={product.id}
+              key={product._id}
               product={product}
-              onClick={setSelectedProduct}
+              onClick={(id) => setSelectedProductId(id)}
             />
           ))}
         </div>
 
         {/* Product Modal */}
         <ProductModal
-          product={selectedProduct}
-          isOpen={!!selectedProduct}
-          onClose={() => setSelectedProduct(null)}
+          productId={selectedProductId}
+          isOpen={!!selectedProductId}
+          onClose={() => setSelectedProductId(null)}
         />
       </Layout>
       <Footer />

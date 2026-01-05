@@ -1,28 +1,81 @@
+const BACKEND_URL = import.meta.env.VITE_API_BASE_URL;
 
+export default function ProductCard({ product,onClick}) {
+  // 🔒 Normalize image source safely
+  let imageSrc = "/placeholder.png";
 
-export default function ProductCard({ product }) {
+  if (
+    Array.isArray(product.productPhotoSrc) &&
+    product.productPhotoSrc.length > 0
+  ) {
+    const rawSrc = product.productPhotoSrc[0];
+
+    imageSrc = rawSrc.startsWith("http")
+      ? rawSrc
+      : `${BACKEND_URL}${rawSrc}`;
+  }
+
+  if (!product) return (<div className="text-gray-400">No product found</div>);
+
   return (
-    <div className="product-card card">
-      <div className="product-image-wrapper">
+    <div 
+    onClick={()=>{onClick(product._id)}}
+
+    className="group relative bg-[#0f172a]/60 backdrop-blur-xl border border-white/10 rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl hover:shadow-orange-500/10 transition-all duration-300 hover:-translate-y-1">
+      {/* Image Section */}
+      <div className="relative overflow-hidden">
         <img
-          src={product.image}
-          alt={product.title}
-          className="product-image"
+          src={imageSrc}
+          alt={product.productName}
+          className="w-full h-48 object-cover transition-transform duration-300 group-hover:scale-105"
           loading="lazy"
         />
-        <div className="product-badge">{product.category}</div>
+        {/* Gradient Overlay */}
+        <div className="absolute inset-0 bg-gradient-to-t from-[#0f172a]/80 to-transparent opacity-60"></div>
+
+        {/* Category Badge */}
+        <div className="absolute top-3 left-3 px-3 py-1 bg-gradient-to-r from-orange-500 to-orange-600 text-white text-xs font-semibold rounded-full shadow-lg shadow-orange-500/20">
+          {product.productCatogery}
+        </div>
+
+        {/* Wishlist Button */}
+        <button className="absolute top-3 right-3 p-2 bg-[#1e293b]/70 backdrop-blur-sm border border-white/10 rounded-full text-gray-400 hover:text-orange-400 hover:bg-[#1e293b] transition-all duration-200">
+          <svg
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            width="16"
+            height="16"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+            />
+          </svg>
+        </button>
       </div>
-      <div className="product-content">
-        <h3 className="product-title">{product.title}</h3>
-        <p className="product-price">₹{product.price.toLocaleString('en-IN')}</p>
-        <div className="product-meta">
-          <span className="product-location">
+
+      {/* Content Section */}
+      <div className="p-5 bg-[#1e293b]/40">
+        <h3 className="text-lg font-bold text-white mb-2 truncate group-hover:text-orange-400 transition-colors">
+          {product.productName}
+        </h3>
+
+        <p className="text-2xl font-bold bg-gradient-to-r from-orange-400 to-orange-500 bg-clip-text text-transparent mb-4">
+          ₹{product.productPrice}
+        </p>
+
+        <div className="flex items-center justify-between text-sm text-gray-400 border-t border-slate-700/50 pt-4">
+          <span className="flex items-center gap-1.5 hover:text-white transition-colors">
             <svg
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
-              width="16"
-              height="16"
+              width="14"
+              height="14"
+              className="text-orange-500"
             >
               <path
                 strokeLinecap="round"
@@ -37,9 +90,12 @@ export default function ProductCard({ product }) {
                 d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
               />
             </svg>
-            {product.location}
+            <span className="truncate max-w-[100px]">{product.productLocation}</span>
           </span>
-          <span className="product-date">{product.postedDate}</span>
+
+          <span className="text-xs text-gray-500 bg-[#0f172a]/50 px-2 py-1 rounded-md">
+            {product.postedDate}
+          </span>
         </div>
       </div>
     </div>

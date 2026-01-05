@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import { Eye, EyeOff, Lock, CheckCircle, AlertCircle } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
 
 const ResetPasswordPage = () => {
     const [newPassword, setNewPassword] = useState("");
@@ -46,7 +48,7 @@ const ResetPasswordPage = () => {
 
         try {
             const res = await axios.post(
-                `http://localhost:4000/api/auth/reset-password/${token}`,
+                `${API_BASE_URL}/api/auth/reset-password/${token}`,
                 {
                     newPassword,
                 },
