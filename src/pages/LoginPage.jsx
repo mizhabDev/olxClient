@@ -2,9 +2,12 @@ import React, { useEffect, useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
 import AuthInfoPanel from "../components/authPage/AuthInfoPannel";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import ForgotPasswordModal from "../components/authPage/ForgetPasswordModal";
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
+
+
 
 const LoginPage = () => {
     const [email, setEmail] = useState("");
@@ -17,10 +20,17 @@ const LoginPage = () => {
     const [showForgotModal, setShowForgotModal] = useState(false);
     const [forgotStatus, setForgotStatus] = useState(""); // success / error message
     const [loadingForgot, setLoadingForgot] = useState(false);
-    
+
 
 
     const navigate = useNavigate();
+    const location = useLocation();
+
+    useEffect(() => {
+        if (location.state?.warning) {
+            setAuthError(location.state.warning);
+        }
+    }, [location.state]);
 
 
     useEffect(() => {
@@ -32,8 +42,6 @@ const LoginPage = () => {
 
         return () => clearTimeout(timer);
     }, [authError]);
-
-
 
 
 

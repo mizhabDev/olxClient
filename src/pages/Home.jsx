@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import ProductCard from '../components/ProductCard';
+import ProductCard from '../components/homepage/ProductCard';
 import Layout from '../components/homepage/Layout';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
@@ -18,38 +18,63 @@ const CATEGORIES = ['All', 'Electronics', 'Vehicles', 'Furniture', 'Fashion', 'P
 const Home = () => {
   const navigate = useNavigate();
   const [products, setProducts] = useState([]);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
   const [activeCategory, setActiveCategory] = useState("All");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        setLoading(true);
 
-        const res = await axios.get(
+  const fetchProducts = async (pageNumber = 1) => {
+    try {
+      setLoading(true);
 
-          `${API_BASE_URL}/api/page/homePage`,
-          {
-            withCredentials: true, // 🔑 SEND COOKIE
-          }
+      const res = await axios.get(
+
+        `${API_BASE_URL}/api/page/homePage?page=${pageNumber}`,
+        {
+          withCredentials: true, // 🔑 SEND COOKIE
+        }
+      );
+
+      if (res.data.success) {
+        setProducts(prev =>
+          pageNumber === 1
+            ? res.data.products
+            : [...prev, ...res.data.products]
         );
 
-        console.log(res.data);
-        setProducts(res.data);
-        setLoading(false);
-
-      } catch (err) {
-        console.log("Error fetching products:", err);
-        setError("Failed to fetch products.");
-        setLoading(false);
-      } finally {
-        setLoading(false);
+        setHasMore(res.data.pagination.hasMore);
+      } else {
+        setError(res.data.message || "Failed to fetch products");
       }
-    };
 
-    fetchProducts();
+    } catch (err) {
+      console.log("Error fetching products:", err);
+      setError("Failed to fetch products.", err);
+      setLoading(false);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+
+
+  const handleShowMore = () => {
+    const nextPage = page + 1;
+    setPage(nextPage);
+    fetchProducts(nextPage);
+  };
+
+  useEffect(() => {
+
+    fetchProducts(1);
+
+
+
   }, []);
+
+
 
 
   // ✅ Category filter
@@ -118,6 +143,21 @@ const Home = () => {
             />
           ))}
         </div>
+        {/* Show More Button */}
+
+        {hasMore && !loading && (
+          <div className="flex justify-end mt-12 mb-4">
+            <button
+              onClick={handleShowMore}
+              className="group relative px-10 py-4 bg-[#1e293b]/60 backdrop-blur-xl border border-white/10 rounded-2xl overflow-hidden shadow-xl transition-all duration-300 hover:-translate-y-1 hover:border-orange-500/30"
+            >
+              <span className="relative z-10 text-lg font-semibold bg-gradient-to-r from-orange-400 to-orange-500 bg-clip-text text-transparent group-hover:from-orange-300 group-hover:to-orange-400 transition-all">
+                Show More
+              </span>
+              
+            </button>
+          </div>
+        )}
       </Layout>
       <Footer />
     </>

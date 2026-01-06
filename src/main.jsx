@@ -11,46 +11,36 @@ import SellPage from "./pages/SellPage.jsx";
 import GoogleAuth from "./pages/GoogleAuth.jsx";
 import ResetPasswordPage from "./pages/ResetPasswordPage.jsx";
 import ProductDetailPage from "./pages/ProductDetailPage.jsx";
+import ProfilePage from "./pages/ProfilePage.jsx";
+import ChatPage from "./pages/ChatPage.jsx";
+import AuthGuard from "./routes/AuthGuard.jsx";
 
 const router = createBrowserRouter([
   {
     element: <App />,
     children: [
+      // 🌐 Public routes
+      { path: "/", element: <Home /> },
+      { path: "/home", element: <Home /> },
+      { path: "/login", element: <LoginPage /> },
+      { path: "/signup", element: <SignUpPage /> },
+      { path: "/oauth-success", element: <GoogleAuth /> },
+      { path: "/reset-password/:token", element: <ResetPasswordPage /> },
+
+      // 🔒 Protected routes
       {
-        path: "/",
-        element: <Home />,
-      },
-      {
-        path: "/home",
-        element: <Home />,
-      },
-      {
-        path: "/login",
-        element: <LoginPage />,
-      },
-      {
-        path: "/signup",
-        element: <SignUpPage />,
-      },
-      {
-        path: "/sell",
-        element: <SellPage />,
-      },
-      {
-        path: "/oauth-success",
-        element: <GoogleAuth />,
-      },
-      {
-        path: "/reset-password/:token",
-        element: <ResetPasswordPage />,
-      },
-      {
-        path: "/product/:productId",
-        element: <ProductDetailPage />,
+        element: <AuthGuard />,
+        children: [
+          { path: "/sell", element: <SellPage /> },
+          { path: "/product/:productId", element: <ProductDetailPage /> },
+          { path: "/profile", element: <ProfilePage /> },
+          { path: "/chat", element: <ChatPage /> },
+        ],
       },
     ],
   },
 ]);
+
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>

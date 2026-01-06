@@ -1,6 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { Facebook, Twitter, Instagram, Linkedin, Mail, Phone, MapPin } from "lucide-react";
+import Logo from "../assets/images/logoImage.png";
 
 const Footer = () => {
     const currentYear = new Date().getFullYear();
@@ -40,11 +41,15 @@ const Footer = () => {
                 <div className="py-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8">
                     {/* Brand Section */}
                     <div className="lg:col-span-2">
-                        <Link to="/" className="flex items-center gap-2 mb-4">
-                            <div className="w-10 h-10 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl flex items-center justify-center shadow-lg shadow-orange-500/30">
-                                <span className="text-white font-bold text-lg">T</span>
+                        <Link to="/" className="flex items-center gap-3 mb-4">
+                            <div className="w-10 h-10 rounded-xl overflow-hidden shadow-lg shadow-orange-500/20">
+                                <img
+                                    src={Logo}
+                                    alt="Sellzy Logo"
+                                    className="w-full h-full object-cover"
+                                />
                             </div>
-                            <span className="text-xl font-bold text-white">Tefora</span>
+                            <span className="text-xl font-bold bg-gradient-to-r from-orange-400 to-orange-500 bg-clip-text text-transparent">Sellzy</span>
                         </Link>
                         <p className="text-gray-400 text-sm leading-relaxed mb-6 max-w-sm">
                             Your trusted marketplace for buying and selling. Connect with millions of buyers and sellers in your community.
@@ -54,15 +59,15 @@ const Footer = () => {
                         <div className="space-y-2">
                             <div className="flex items-center gap-3 text-gray-400 text-sm">
                                 <Mail className="w-4 h-4 text-orange-500" />
-                                <span>support@tefora.com</span>
+                                <span>support@sellzy.com</span>
                             </div>
                             <div className="flex items-center gap-3 text-gray-400 text-sm">
                                 <Phone className="w-4 h-4 text-orange-500" />
-                                <span>+1 (555) 123-4567</span>
+                                <span>+91 98765 43210</span>
                             </div>
                             <div className="flex items-center gap-3 text-gray-400 text-sm">
                                 <MapPin className="w-4 h-4 text-orange-500" />
-                                <span>San Francisco, CA</span>
+                                <span>Mumbai, India</span>
                             </div>
                         </div>
                     </div>
@@ -122,7 +127,7 @@ const Footer = () => {
                 {/* Bottom Bar */}
                 <div className="py-6 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4">
                     <p className="text-gray-500 text-sm">
-                        © {currentYear} Tefora. All rights reserved.
+                        © {currentYear} Sellzy. All rights reserved.
                     </p>
 
                     {/* Social Links */}

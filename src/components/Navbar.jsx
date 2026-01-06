@@ -1,6 +1,7 @@
 import React, { useState } from "react";
-import { Search, Bell, MessageCircle, Plus, Menu, X, User } from "lucide-react";
+import { Search, MessageCircle, Plus, Menu, X, User } from "lucide-react";
 import { Link } from "react-router-dom";
+import Logo from "../assets/images/logoImage.png";
 
 const Navbar = () => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -11,11 +12,15 @@ const Navbar = () => {
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex items-center justify-between h-16">
                     {/* Logo */}
-                    <Link to="/" className="flex items-center gap-2">
-                        <div className="w-10 h-10 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl flex items-center justify-center shadow-lg shadow-orange-500/30">
-                            <span className="text-white font-bold text-lg">OlX</span>
+                    <Link to="/" className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-xl overflow-hidden shadow-lg shadow-orange-500/20">
+                            <img
+                                src={Logo}
+                                alt="Sellzy Logo"
+                                className="w-full h-full object-cover"
+                            />
                         </div>
-                        <span className="text-xl font-bold text-white hidden sm:block"></span>
+                        <span className="text-xl font-bold bg-gradient-to-r from-orange-400 to-orange-500 bg-clip-text text-transparent hidden sm:block">Sellzy</span>
                     </Link>
 
                     {/* Search Bar - Desktop */}
@@ -43,11 +48,6 @@ const Navbar = () => {
                             <span>Sell</span>
                         </Link>
 
-                        {/* Notifications */}
-                        <button className="relative p-2.5 rounded-xl bg-white/5 border border-white/10 text-gray-400 hover:text-white hover:bg-white/10 transition-all">
-                            <Bell className="w-5 h-5" />
-                            <span className="absolute top-1 right-1 w-2 h-2 bg-orange-500 rounded-full"></span>
-                        </button>
 
                         {/* Messages */}
                         <button className="relative p-2.5 rounded-xl bg-white/5 border border-white/10 text-gray-400 hover:text-white hover:bg-white/10 transition-all">
@@ -103,16 +103,10 @@ const Navbar = () => {
                                 <span>Sell Something</span>
                             </Link>
 
-                            <div className="flex gap-2">
-                                <button className="flex-1 flex items-center justify-center gap-2 p-3 rounded-xl bg-white/5 border border-white/10 text-gray-300">
-                                    <Bell className="w-5 h-5" />
-                                    <span>Notifications</span>
-                                </button>
-                                <button className="flex-1 flex items-center justify-center gap-2 p-3 rounded-xl bg-white/5 border border-white/10 text-gray-300">
-                                    <MessageCircle className="w-5 h-5" />
-                                    <span>Messages</span>
-                                </button>
-                            </div>
+                            <button className="flex items-center justify-center gap-2 p-3 rounded-xl bg-white/5 border border-white/10 text-gray-300">
+                                <MessageCircle className="w-5 h-5" />
+                                <span>Messages</span>
+                            </button>
 
                             <Link
                                 to="/login"
