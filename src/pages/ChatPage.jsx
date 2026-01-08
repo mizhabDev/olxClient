@@ -9,43 +9,10 @@ import {
     CheckCheck,
     User
 } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import axios from "axios";
 
 const BACKEND_URL = import.meta.env.VITE_API_BASE_URL;
-
-// Sample chat data - replace with actual API data
-const sampleConversations = [
-    {
-        id: 1,
-        name: "John Doe",
-        lastMessage: "Is this still available?",
-        time: "2:30 PM",
-        unread: 2,
-        online: true,
-        avatar: null,
-        product: "iPhone 13 Pro"
-    },
-    {
-        id: 2,
-        name: "Jane Smith",
-        lastMessage: "Can you do ₹8000?",
-        time: "Yesterday",
-        unread: 0,
-        online: false,
-        avatar: null,
-        product: "MacBook Air"
-    },
-    {
-        id: 3,
-        name: "Mike Johnson",
-        lastMessage: "Thanks for the quick response!",
-        time: "Yesterday",
-        unread: 0,
-        online: true,
-        avatar: null,
-        product: "Gaming PC"
-    }
-];
 
 const sampleMessages = [
     {
@@ -87,13 +54,63 @@ const sampleMessages = [
 
 const ChatPage = () => {
     const navigate = useNavigate();
-    const [conversations] = useState(sampleConversations);
+    const [searchParams] = useSearchParams();
+    const conversationIdFromUrl = searchParams.get("conversationId");
+
+    const [conversations, setConversations] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
     const [selectedChat, setSelectedChat] = useState(null);
     const [messages, setMessages] = useState(sampleMessages);
     const [newMessage, setNewMessage] = useState("");
     const [searchQuery, setSearchQuery] = useState("");
     const [isMobileView, setIsMobileView] = useState(false);
     const messagesEndRef = useRef(null);
+
+    // Fetch conversations from API
+    useEffect(() => {
+        const fetchConversations = async () => {
+            try {
+                setLoading(true);
+                const response = await axios.get(`${BACKEND_URL}/message/conversation`, {
+                    withCredentials: true, // ⚠️ see Error 2
+                });
+
+                const data = response.data;
+
+                if (data.success) {
+                    // Transform API data to match component structure
+                    const transformedConversations = data.data.map((conv) => ({
+                        id: conv._id,
+                        name: conv.sellerId?.name || conv.buyerId?.name || "Unknown",
+                        lastMessage: "",
+                        time: new Date(conv.updatedAt).toLocaleTimeString("en-US", {
+                            hour: "numeric",
+                            minute: "2-digit",
+                            hour12: true
+                        }),
+                        unread: 0,
+                        online: false,
+                        avatar: null,
+                        product: conv.productId?.productName || "Product",
+                        sellerId: conv.sellerId,
+                        buyerId: conv.buyerId,
+                        productId: conv.productId
+                    }));
+                    setConversations(transformedConversations);
+                } else {
+                    setError("Failed to fetch conversations");
+                }
+            } catch (err) {
+                setError("Error fetching conversations");
+                console.error("Fetch error:", err);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchConversations();
+    }, []);
 
     // Check for mobile view
     useEffect(() => {
@@ -104,6 +121,16 @@ const ChatPage = () => {
         window.addEventListener("resize", checkMobile);
         return () => window.removeEventListener("resize", checkMobile);
     }, []);
+
+    // Auto-select conversation from URL query parameter
+    useEffect(() => {
+        if (conversationIdFromUrl && conversations.length > 0 && !selectedChat) {
+            const conversation = conversations.find(conv => conv.id === conversationIdFromUrl);
+            if (conversation) {
+                setSelectedChat(conversation);
+            }
+        }
+    }, [conversationIdFromUrl, conversations, selectedChat]);
 
     // Scroll to bottom when messages change
     useEffect(() => {
@@ -166,45 +193,59 @@ const ChatPage = () => {
 
             {/* Conversations List */}
             <div className="flex-1 overflow-y-auto">
-                {filteredConversations.map((conv) => (
-                    <motion.button
-                        key={conv.id}
-                        whileHover={{ backgroundColor: "rgba(255,255,255,0.05)" }}
-                        onClick={() => setSelectedChat(conv)}
-                        className={`w-full p-4 flex items-center gap-3 border-b border-white/5 transition-colors ${selectedChat?.id === conv.id ? 'bg-white/10' : ''}`}
-                    >
-                        {/* Avatar */}
-                        <div className="relative flex-shrink-0">
-                            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center overflow-hidden">
-                                {conv.avatar ? (
-                                    <img src={conv.avatar} alt={conv.name} className="w-full h-full object-cover" />
-                                ) : (
-                                    <User className="w-6 h-6 text-white" />
+                {loading ? (
+                    <div className="flex items-center justify-center h-full">
+                        <div className="w-8 h-8 border-2 border-purple-500 border-t-transparent rounded-full animate-spin"></div>
+                    </div>
+                ) : error ? (
+                    <div className="flex items-center justify-center h-full p-4 text-center">
+                        <p className="text-red-400">{error}</p>
+                    </div>
+                ) : filteredConversations.length === 0 ? (
+                    <div className="flex items-center justify-center h-full p-4 text-center">
+                        <p className="text-gray-400">No conversations yet</p>
+                    </div>
+                ) : (
+                    filteredConversations.map((conv) => (
+                        <motion.button
+                            key={conv.id}
+                            whileHover={{ backgroundColor: "rgba(255,255,255,0.05)" }}
+                            onClick={() => setSelectedChat(conv)}
+                            className={`w-full p-4 flex items-center gap-3 border-b border-white/5 transition-colors ${selectedChat?.id === conv.id ? 'bg-white/10' : ''}`}
+                        >
+                            {/* Avatar */}
+                            <div className="relative flex-shrink-0">
+                                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center overflow-hidden">
+                                    {conv.avatar ? (
+                                        <img src={conv.avatar} alt={conv.name} className="w-full h-full object-cover" />
+                                    ) : (
+                                        <User className="w-6 h-6 text-white" />
+                                    )}
+                                </div>
+                                {conv.online && (
+                                    <div className="absolute bottom-0 right-0 w-3.5 h-3.5 bg-green-500 rounded-full border-2 border-[#0f172a]"></div>
                                 )}
                             </div>
-                            {conv.online && (
-                                <div className="absolute bottom-0 right-0 w-3.5 h-3.5 bg-green-500 rounded-full border-2 border-[#0f172a]"></div>
-                            )}
-                        </div>
 
-                        {/* Chat Info */}
-                        <div className="flex-1 min-w-0 text-left">
-                            <div className="flex items-center justify-between mb-1">
-                                <h3 className="font-semibold text-white truncate">{conv.name}</h3>
-                                <span className="text-xs text-gray-500">{conv.time}</span>
+                            {/* Chat Info */}
+                            <div className="flex-1 min-w-0 text-left">
+                                <div className="flex items-center justify-between mb-1">
+                                    <h3 className="font-semibold text-white truncate">{conv.name}</h3>
+                                    <span className="text-xs text-gray-500">{conv.time}</span>
+                                </div>
+                                <div className="flex items-center justify-between">
+                                    <p className="text-sm text-gray-400 truncate">{conv.lastMessage}</p>
+                                    {conv.unread > 0 && (
+                                        <span className="flex-shrink-0 w-5 h-5 bg-purple-500 rounded-full text-xs text-white flex items-center justify-center">
+                                            {conv.unread}
+                                        </span>
+                                    )}
+                                </div>
+                                <p className="text-xs text-purple-400 truncate mt-0.5">{conv.product}</p>
                             </div>
-                            <div className="flex items-center justify-between">
-                                <p className="text-sm text-gray-400 truncate">{conv.lastMessage}</p>
-                                {conv.unread > 0 && (
-                                    <span className="flex-shrink-0 w-5 h-5 bg-purple-500 rounded-full text-xs text-white flex items-center justify-center">
-                                        {conv.unread}
-                                    </span>
-                                )}
-                            </div>
-                            <p className="text-xs text-purple-400 truncate mt-0.5">{conv.product}</p>
-                        </div>
-                    </motion.button>
-                ))}
+                        </motion.button>
+                    ))
+                )}
             </div>
         </div>
     );

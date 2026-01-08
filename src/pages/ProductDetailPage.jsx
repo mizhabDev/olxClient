@@ -11,12 +11,9 @@ import {
     ChevronLeft,
     ChevronRight,
     User,
-    Phone,
-    Mail,
-    Calendar,
-    X,
     ZoomIn,
-    Shield
+    Shield,
+    X,
 } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 
@@ -73,8 +70,21 @@ const ProductDetailPage = () => {
         return () => window.removeEventListener("keydown", handleKeyDown);
     }, [handleKeyDown]);
 
-    const handleChat = () => {
-        navigate("/chat");
+    const handleChat = async () => {
+        try {
+            const response = await axios.post(
+                `${BACKEND_URL}/message/createOrGetConversation`,
+                { productId },
+                { withCredentials: true }
+            );
+
+            if (response.data.success) {
+                const conversationId = response.data.data.conversationId;
+                navigate(`/chat?conversationId=${conversationId}`);
+            }
+        } catch (err) {
+            console.error("Failed to create/get conversation:", err);
+        }
     };
 
     const handleBack = () => {

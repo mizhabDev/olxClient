@@ -52,16 +52,27 @@ const ProfilePage = () => {
 
     const handleLogout = async () => {
         try {
-            await axios.post(
-                `${BACKEND_URL}/api/auth/logout`,
-                {},
-                { withCredentials: true }
-            );
+            setLoading(true);
+                setError(null);
+
+                const res = await axios.post(
+                    `${BACKEND_URL}/api/auth/logout`,
+                    {},
+                    { withCredentials: true }
+                );
+
+                setUser(res.data.data);
+            
             navigate("/login");
         } catch (err) {
             console.error("Logout failed:", err);
         }
     };
+
+
+
+
+   
 
     // Loading State
     if (loading) {

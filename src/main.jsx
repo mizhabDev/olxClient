@@ -13,6 +13,7 @@ import ResetPasswordPage from "./pages/ResetPasswordPage.jsx";
 import ProductDetailPage from "./pages/ProductDetailPage.jsx";
 import ProfilePage from "./pages/ProfilePage.jsx";
 import ChatPage from "./pages/ChatPage.jsx";
+import ContentPage from "./pages/ContentPage.jsx";
 import AuthGuard from "./routes/AuthGuard.jsx";
 
 const router = createBrowserRouter([
@@ -26,6 +27,7 @@ const router = createBrowserRouter([
       { path: "/signup", element: <SignUpPage /> },
       { path: "/oauth-success", element: <GoogleAuth /> },
       { path: "/reset-password/:token", element: <ResetPasswordPage /> },
+      { path: "/page/:slug", element: <ContentPage /> },
 
       // 🔒 Protected routes
       {
