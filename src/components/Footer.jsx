@@ -9,21 +9,14 @@ const Footer = () => {
     const footerLinks = {
         company: [
             { label: "About Us", to: "/about" },
-            { label: "Careers", to: "/careers" },
-            { label: "Press", to: "/press" },
-            { label: "Blog", to: "/blog" },
+            { label: "Contact Us", to: "/contact" },
         ],
         support: [
-            { label: "Help Center", to: "/help" },
-            { label: "Safety Tips", to: "/safety" },
-            { label: "Contact Us", to: "/contact" },
             { label: "FAQ", to: "/faq" },
         ],
         legal: [
             { label: "Terms of Service", to: "/terms" },
             { label: "Privacy Policy", to: "/privacy" },
-            { label: "Cookie Policy", to: "/cookies" },
-            { label: "Disclaimer", to: "/disclaimer" },
         ],
     };
 
@@ -42,31 +35,31 @@ const Footer = () => {
                     {/* Brand Section */}
                     <div className="lg:col-span-2">
                         <Link to="/" className="flex items-center gap-3 mb-4">
-                            <div className="w-10 h-10 rounded-xl overflow-hidden shadow-lg shadow-orange-500/20">
+                            <div className="w-10 h-10 rounded-xl overflow-hidden shadow-lg shadow-purple-500/20">
                                 <img
                                     src={Logo}
                                     alt="Sellzy Logo"
                                     className="w-full h-full object-cover"
                                 />
                             </div>
-                            <span className="text-xl font-bold bg-gradient-to-r from-orange-400 to-orange-500 bg-clip-text text-transparent">Sellzy</span>
+                            <span className="text-xl font-bold bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">Sellzy</span>
                         </Link>
                         <p className="text-gray-400 text-sm leading-relaxed mb-6 max-w-sm">
-                            Your trusted marketplace for buying and selling. Connect with millions of buyers and sellers in your community.
+                            Your trusted marketplace for buying and selling. Connect with buyers and sellers in your community.
                         </p>
 
                         {/* Contact Info */}
                         <div className="space-y-2">
                             <div className="flex items-center gap-3 text-gray-400 text-sm">
-                                <Mail className="w-4 h-4 text-orange-500" />
+                                <Mail className="w-4 h-4 text-purple-400" />
                                 <span>support@sellzy.com</span>
                             </div>
                             <div className="flex items-center gap-3 text-gray-400 text-sm">
-                                <Phone className="w-4 h-4 text-orange-500" />
-                                <span>+91 98765 43210</span>
+                                <Phone className="w-4 h-4 text-purple-400" />
+                                <span>+91 1800-123-4567</span>
                             </div>
                             <div className="flex items-center gap-3 text-gray-400 text-sm">
-                                <MapPin className="w-4 h-4 text-orange-500" />
+                                <MapPin className="w-4 h-4 text-purple-400" />
                                 <span>Mumbai, India</span>
                             </div>
                         </div>
@@ -80,7 +73,7 @@ const Footer = () => {
                                 <li key={link.label}>
                                     <Link
                                         to={link.to}
-                                        className="text-gray-400 text-sm hover:text-orange-500 transition-colors"
+                                        className="text-gray-400 text-sm hover:text-purple-400 transition-colors"
                                     >
                                         {link.label}
                                     </Link>
@@ -97,7 +90,7 @@ const Footer = () => {
                                 <li key={link.label}>
                                     <Link
                                         to={link.to}
-                                        className="text-gray-400 text-sm hover:text-orange-500 transition-colors"
+                                        className="text-gray-400 text-sm hover:text-purple-400 transition-colors"
                                     >
                                         {link.label}
                                     </Link>
@@ -114,7 +107,7 @@ const Footer = () => {
                                 <li key={link.label}>
                                     <Link
                                         to={link.to}
-                                        className="text-gray-400 text-sm hover:text-orange-500 transition-colors"
+                                        className="text-gray-400 text-sm hover:text-purple-400 transition-colors"
                                     >
                                         {link.label}
                                     </Link>
@@ -137,7 +130,7 @@ const Footer = () => {
                                 key={social.label}
                                 href={social.href}
                                 aria-label={social.label}
-                                className="p-2 rounded-lg bg-white/5 border border-white/10 text-gray-400 hover:text-white hover:bg-white/10 hover:border-orange-500/50 transition-all"
+                                className="p-2 rounded-lg bg-white/5 border border-white/10 text-gray-400 hover:text-white hover:bg-white/10 hover:border-purple-500/50 transition-all"
                             >
                                 <social.icon className="w-4 h-4" />
                             </a>

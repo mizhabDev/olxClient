@@ -28,6 +28,7 @@ const ProductDetailPage = () => {
     const [error, setError] = useState(null);
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
     const [isLiked, setIsLiked] = useState(false);
+    const [wishlistLoading, setWishlistLoading] = useState(false);
     const [showLightbox, setShowLightbox] = useState(false);
 
     // Fetch product on mount
@@ -56,6 +57,54 @@ const ProductDetailPage = () => {
         fetchProduct();
     }, [productId]);
 
+    // Check if product is in wishlist
+    useEffect(() => {
+        const checkWishlist = async () => {
+            try {
+                const res = await axios.get(
+                    `${BACKEND_URL}/api/wishlist`,
+                    { withCredentials: true }
+                );
+                if (res.data.wishlist) {
+                    const isInWishlist = res.data.wishlist.some(item => item._id === productId);
+                    setIsLiked(isInWishlist);
+                }
+            } catch (err) {
+                // User not logged in or wishlist not available
+            }
+        };
+        if (productId) {
+            checkWishlist();
+        }
+    }, [productId]);
+
+    // Toggle wishlist
+    const toggleWishlist = async () => {
+        try {
+            setWishlistLoading(true);
+            if (isLiked) {
+                // Remove from wishlist
+                await axios.delete(
+                    `${BACKEND_URL}/api/wishlist/remove/${productId}`,
+                    { withCredentials: true }
+                );
+                setIsLiked(false);
+            } else {
+                // Add to wishlist
+                await axios.post(
+                    `${BACKEND_URL}/api/wishlist/add/${productId}`,
+                    {},
+                    { withCredentials: true }
+                );
+                setIsLiked(true);
+            }
+        } catch (err) {
+            console.error("Wishlist error:", err);
+        } finally {
+            setWishlistLoading(false);
+        }
+    };
+
     // Keyboard navigation for lightbox
     const handleKeyDown = useCallback((e) => {
         if (!showLightbox) return;
@@ -73,13 +122,13 @@ const ProductDetailPage = () => {
     const handleChat = async () => {
         try {
             const response = await axios.post(
-                `${BACKEND_URL}/message/createOrGetConversation`,
+                `${BACKEND_URL}/api/message/conversation`,
                 { productId },
                 { withCredentials: true }
             );
 
             if (response.data.success) {
-                const conversationId = response.data.data.conversationId;
+                const conversationId = response.data.data._id;
                 navigate(`/chat?conversationId=${conversationId}`);
             }
         } catch (err) {
@@ -313,13 +362,18 @@ const ProductDetailPage = () => {
                                 {/* Action Buttons */}
                                 <div className="flex gap-2">
                                     <button
-                                        onClick={() => setIsLiked(!isLiked)}
-                                        className={`p-3 rounded-full border border-white/10 transition-all ${isLiked
+                                        onClick={toggleWishlist}
+                                        disabled={wishlistLoading}
+                                        className={`p-3 rounded-full border border-white/10 transition-all disabled:opacity-50 ${isLiked
                                             ? "bg-red-500/20 text-red-400"
                                             : "bg-white/5 text-gray-400 hover:text-white hover:bg-white/10"
                                             }`}
                                     >
-                                        <Heart className={`w-5 h-5 ${isLiked ? "fill-current" : ""}`} />
+                                        {wishlistLoading ? (
+                                            <div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                                        ) : (
+                                            <Heart className={`w-5 h-5 ${isLiked ? "fill-current" : ""}`} />
+                                        )}
                                     </button>
                                     <button
                                         onClick={handleShare}

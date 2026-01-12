@@ -14,7 +14,10 @@ import ProductDetailPage from "./pages/ProductDetailPage.jsx";
 import ProfilePage from "./pages/ProfilePage.jsx";
 import ChatPage from "./pages/ChatPage.jsx";
 import ContentPage from "./pages/ContentPage.jsx";
+import WishlistPage from "./pages/WishlistPage.jsx";
+import MyListingsPage from "./pages/MyListingsPage.jsx";
 import AuthGuard from "./routes/AuthGuard.jsx";
+import { AboutPage, ContactPage, PrivacyPolicyPage, TermsPage, FAQPage } from "./pages/static";
 
 const router = createBrowserRouter([
   {
@@ -29,6 +32,13 @@ const router = createBrowserRouter([
       { path: "/reset-password/:token", element: <ResetPasswordPage /> },
       { path: "/page/:slug", element: <ContentPage /> },
 
+      // 📄 Static pages
+      { path: "/about", element: <AboutPage /> },
+      { path: "/contact", element: <ContactPage /> },
+      { path: "/privacy", element: <PrivacyPolicyPage /> },
+      { path: "/terms", element: <TermsPage /> },
+      { path: "/faq", element: <FAQPage /> },
+
       // 🔒 Protected routes
       {
         element: <AuthGuard />,
@@ -37,6 +47,8 @@ const router = createBrowserRouter([
           { path: "/product/:productId", element: <ProductDetailPage /> },
           { path: "/profile", element: <ProfilePage /> },
           { path: "/chat", element: <ChatPage /> },
+          { path: "/wishlist", element: <WishlistPage /> },
+          { path: "/my-listings", element: <MyListingsPage /> },
         ],
       },
     ],

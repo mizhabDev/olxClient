@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
-import AuthInfoPanel from "../components/authPage/AuthInfoPannel";
-import OtpModal from "../components/authPage/OtpModal";
+import AuthInfoPanel from "../components/auth/AuthInfoPannel";
+import OtpModal from "../components/auth/OtpModal";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;

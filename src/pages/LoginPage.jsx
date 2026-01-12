@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
-import AuthInfoPanel from "../components/authPage/AuthInfoPannel";
+import AuthInfoPanel from "../components/auth/AuthInfoPannel";
 import axios from "axios";
 import { useLocation, useNavigate } from "react-router-dom";
-import ForgotPasswordModal from "../components/authPage/ForgetPasswordModal";
+import ForgotPasswordModal from "../components/auth/ForgetPasswordModal";
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 

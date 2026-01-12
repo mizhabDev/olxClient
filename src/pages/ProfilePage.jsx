@@ -20,6 +20,7 @@ const BACKEND_URL = import.meta.env.VITE_API_BASE_URL;
 const ProfilePage = () => {
     const navigate = useNavigate();
     const [user, setUser] = useState(null);
+    const [listings, setListings] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
@@ -35,6 +36,20 @@ const ProfilePage = () => {
                 );
 
                 setUser(res.data.data);
+
+                // Fetch user's listings count
+                try {
+                    const listingsRes = await axios.get(
+                        `${BACKEND_URL}/api/my-listings`,
+                        { withCredentials: true }
+                    );
+                    if (listingsRes.data.listings) {
+                        setListings(listingsRes.data.listings || []);
+                    }
+                } catch (listingsErr) {
+                    // Listings fetch failed, not critical
+                    console.error("Failed to fetch listings:", listingsErr);
+                }
             } catch (err) {
                 console.error("Failed to fetch user details:", err);
                 setError("Failed to load profile. Please try again.");
@@ -53,16 +68,16 @@ const ProfilePage = () => {
     const handleLogout = async () => {
         try {
             setLoading(true);
-                setError(null);
+            setError(null);
 
-                const res = await axios.post(
-                    `${BACKEND_URL}/api/auth/logout`,
-                    {},
-                    { withCredentials: true }
-                );
+            const res = await axios.post(
+                `${BACKEND_URL}/api/auth/logout`,
+                {},
+                { withCredentials: true }
+            );
 
-                setUser(res.data.data);
-            
+            setUser(res.data.data);
+
             navigate("/login");
         } catch (err) {
             console.error("Logout failed:", err);
@@ -72,7 +87,7 @@ const ProfilePage = () => {
 
 
 
-   
+
 
     // Loading State
     if (loading) {
@@ -143,9 +158,9 @@ const ProfilePage = () => {
                         {/* Avatar Section */}
                         <div className="relative">
                             <div className="w-28 h-28 rounded-full bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center overflow-hidden shadow-xl shadow-purple-500/20">
-                                {user?.profilePic ? (
+                                {user?.photo ? (
                                     <img
-                                        src={`${BACKEND_URL}${user.profilePic}`}
+                                        src={user.photo.startsWith('http') ? user.photo : `${BACKEND_URL}${user.photo}`}
                                         alt={user?.name || "User"}
                                         className="w-full h-full object-cover"
                                     />
@@ -209,6 +224,7 @@ const ProfilePage = () => {
                     {/* Wishlist Card */}
                     <motion.div
                         whileHover={{ scale: 1.02 }}
+                        onClick={() => navigate('/wishlist')}
                         className="rounded-2xl glass-panel border border-white/10 bg-[#0f172a]/40 backdrop-blur-xl p-6 cursor-pointer transition-all hover:border-purple-500/30"
                     >
                         <div className="flex items-center gap-4">
@@ -225,6 +241,7 @@ const ProfilePage = () => {
                     {/* My Listings Card */}
                     <motion.div
                         whileHover={{ scale: 1.02 }}
+                        onClick={() => navigate('/my-listings')}
                         className="rounded-2xl glass-panel border border-white/10 bg-[#0f172a]/40 backdrop-blur-xl p-6 cursor-pointer transition-all hover:border-purple-500/30"
                     >
                         <div className="flex items-center gap-4">
@@ -232,7 +249,7 @@ const ProfilePage = () => {
                                 <Package className="w-6 h-6 text-purple-400" />
                             </div>
                             <div>
-                                <p className="text-2xl font-bold text-white">0</p>
+                                <p className="text-2xl font-bold text-white">{listings.length}</p>
                                 <p className="text-gray-400 text-sm">My Listings</p>
                             </div>
                         </div>

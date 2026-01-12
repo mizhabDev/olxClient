@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom';
 import axios from 'axios';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
-import Layout from '../components/homepage/Layout';
+import Layout from '../components/home/Layout';
 import LogoAnimation from '../loading/LoadingAnimation';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;

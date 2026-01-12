@@ -1,6 +1,6 @@
 const BACKEND_URL = import.meta.env.VITE_API_BASE_URL;
 
-export default function ProductCard({ product,onClick}) {
+export default function ProductCard({ product, onClick }) {
   // 🔒 Normalize image source safely
   let imageSrc = "/placeholder.png";
 
@@ -18,10 +18,10 @@ export default function ProductCard({ product,onClick}) {
   if (!product) return (<div className="text-gray-400">No product found</div>);
 
   return (
-    <div 
-    onClick={()=>{onClick(product._id)}}
+    <div
+      onClick={() => { onClick(product._id) }}
 
-    className="group relative bg-[#0f172a]/60 backdrop-blur-xl border border-white/10 rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl hover:shadow-orange-500/10 transition-all duration-300 hover:-translate-y-1">
+      className="group relative bg-[#0f172a]/60 backdrop-blur-xl border border-white/10 rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl hover:shadow-orange-500/10 transition-all duration-300 hover:-translate-y-1">
       {/* Image Section */}
       <div className="relative overflow-hidden">
         <img
@@ -34,27 +34,9 @@ export default function ProductCard({ product,onClick}) {
         <div className="absolute inset-0 bg-gradient-to-t from-[#0f172a]/80 to-transparent opacity-60"></div>
 
         {/* Category Badge */}
-        <div className="absolute top-3 left-3 px-3 py-1 bg-gradient-to-r from-orange-500 to-orange-600 text-white text-xs font-semibold rounded-full shadow-lg shadow-orange-500/20">
+        <div className="absolute top-3 left-3 px-3 py-1 bg-gradient-to-r from-purple-500 to-blue-500 text-white text-xs font-semibold rounded-full shadow-lg shadow-purple-500/20">
           {product.productCatogery}
         </div>
-
-        {/* Wishlist Button */}
-        <button className="absolute top-3 right-3 p-2 bg-[#1e293b]/70 backdrop-blur-sm border border-white/10 rounded-full text-gray-400 hover:text-orange-400 hover:bg-[#1e293b] transition-all duration-200">
-          <svg
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-            width="16"
-            height="16"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
-            />
-          </svg>
-        </button>
       </div>
 
       {/* Content Section */}

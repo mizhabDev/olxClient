@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import ProductCard from '../components/homepage/ProductCard';
-import Layout from '../components/homepage/Layout';
+import ProductCard from '../components/home/ProductCard';
+import Layout from '../components/home/Layout';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
-import HeroBanner from '../components/homepage/HeroBanner';
+import HeroBanner from '../components/home/HeroBanner';
 import LogoAnimation from '../loading/LoadingAnimation';
 import axios from 'axios';
 import { Search } from 'lucide-react';
