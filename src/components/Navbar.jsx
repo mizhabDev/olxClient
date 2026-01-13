@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Menu, X, Home, ShoppingBag, MessageCircle, Info, LogIn, User, LogOut, Settings, ChevronDown } from "lucide-react";
+import { Menu, X, Home, ShoppingBag, MessageCircle, Info, LogIn, User, LogOut, Settings, ChevronDown, Heart } from "lucide-react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
 import Logo from "../assets/images/logoImage.png";
@@ -52,7 +52,7 @@ const Navbar = () => {
     // Handle logout
     const handleLogout = async () => {
         try {
-            await axios.post(`${BACKEND_URL}/api/user/logout`, {}, { withCredentials: true });
+            await axios.post(`${BACKEND_URL}/api/auth/logout`, {}, { withCredentials: true });
             setUser(null);
             setIsUserMenuOpen(false);
             navigate("/");
@@ -72,7 +72,8 @@ const Navbar = () => {
     // User dropdown items
     const userMenuItems = [
         { path: "/profile", label: "Profile", icon: User },
-        { path: "/chat", label: "Messages", icon: MessageCircle },
+        { path: "/wishlist", label: "My Wishlist", icon: Heart },
+        { path: "/my-listings", label: "My Listings", icon: ShoppingBag },
     ];
 
     return (

@@ -211,111 +211,110 @@ const MyListingsPage = () => {
                             </button>
                         </motion.div>
                     ) : (
-                        <div className="grid gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                             <AnimatePresence>
                                 {listings.map((product, index) => (
                                     <motion.div
                                         key={product._id}
                                         initial={{ opacity: 0, y: 20 }}
                                         animate={{ opacity: 1, y: 0 }}
-                                        exit={{ opacity: 0, x: -100 }}
+                                        exit={{ opacity: 0, scale: 0.9 }}
                                         transition={{ delay: index * 0.05 }}
-                                        className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl overflow-hidden hover:bg-white/10 transition-colors"
+                                        className="group relative bg-[#0f172a]/60 backdrop-blur-xl border border-white/10 rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl hover:shadow-orange-500/10 transition-all duration-300 hover:-translate-y-1"
                                     >
-                                        <div className="flex flex-col sm:flex-row">
-                                            {/* Image */}
-                                            <div
-                                                onClick={() => handleViewProduct(product._id)}
-                                                className="sm:w-48 h-48 sm:h-auto cursor-pointer overflow-hidden relative"
-                                            >
-                                                <img
-                                                    src={getImageSrc(product)}
-                                                    alt={product.productName}
-                                                    className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-                                                />
-                                                {/* Sold Badge */}
-                                                {product.isSold && (
-                                                    <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
-                                                        <span className="px-4 py-2 bg-green-500 text-white font-bold rounded-lg">
-                                                            SOLD
-                                                        </span>
-                                                    </div>
+                                        {/* Image Section */}
+                                        <div
+                                            onClick={() => handleViewProduct(product._id)}
+                                            className="relative overflow-hidden cursor-pointer"
+                                        >
+                                            <img
+                                                src={getImageSrc(product)}
+                                                alt={product.productName}
+                                                className="w-full h-48 object-cover transition-transform duration-300 group-hover:scale-105"
+                                                loading="lazy"
+                                            />
+                                            {/* Gradient Overlay */}
+                                            <div className="absolute inset-0 bg-gradient-to-t from-[#0f172a]/80 to-transparent opacity-60"></div>
+
+                                            {/* Category Badge */}
+                                            <div className="absolute top-3 left-3 px-3 py-1 bg-gradient-to-r from-purple-500 to-blue-500 text-white text-xs font-semibold rounded-full shadow-lg shadow-purple-500/20">
+                                                {product.productCatogery}
+                                            </div>
+
+                                            {/* Status Badge */}
+                                            <div className="absolute top-3 right-3">
+                                                {product.isSold ? (
+                                                    <span className="inline-flex items-center gap-1 px-2 py-1 bg-green-500 text-white text-xs font-semibold rounded-full">
+                                                        <CheckCircle className="w-3 h-3" />
+                                                        Sold
+                                                    </span>
+                                                ) : (
+                                                    <span className="inline-flex items-center gap-1 px-2 py-1 bg-blue-500 text-white text-xs font-semibold rounded-full">
+                                                        Active
+                                                    </span>
                                                 )}
                                             </div>
 
-                                            {/* Details */}
-                                            <div className="flex-1 p-5 flex flex-col justify-between">
-                                                <div>
-                                                    <div className="flex items-start justify-between gap-4 mb-2">
-                                                        <div>
-                                                            <div className="flex items-center gap-2 mb-2">
-                                                                <span className="inline-block px-2 py-1 bg-purple-500/20 text-purple-400 text-xs font-medium rounded-md">
-                                                                    {product.productCatogery}
-                                                                </span>
-                                                                {product.isSold ? (
-                                                                    <span className="inline-flex items-center gap-1 px-2 py-1 bg-green-500/20 text-green-400 text-xs font-medium rounded-md">
-                                                                        <CheckCircle className="w-3 h-3" />
-                                                                        Sold
-                                                                    </span>
-                                                                ) : (
-                                                                    <span className="inline-flex items-center gap-1 px-2 py-1 bg-blue-500/20 text-blue-400 text-xs font-medium rounded-md">
-                                                                        <XCircle className="w-3 h-3" />
-                                                                        Active
-                                                                    </span>
-                                                                )}
-                                                            </div>
-                                                            <h3
-                                                                onClick={() => handleViewProduct(product._id)}
-                                                                className="text-xl font-bold text-white hover:text-purple-400 cursor-pointer transition-colors"
-                                                            >
-                                                                {product.productName}
-                                                            </h3>
-                                                        </div>
-                                                        <p className="text-2xl font-bold bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent whitespace-nowrap">
-                                                            ₹{product.productPrice?.toLocaleString()}
-                                                        </p>
-                                                    </div>
+                                            {/* Sold Overlay */}
+                                            {product.isSold && (
+                                                <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                                                    <span className="px-4 py-2 bg-green-500 text-white font-bold rounded-lg text-lg">
+                                                        SOLD
+                                                    </span>
+                                                </div>
+                                            )}
+                                        </div>
 
-                                                    <div className="flex items-center gap-2 text-gray-400 text-sm mb-3">
-                                                        <MapPin className="w-4 h-4" />
-                                                        <span>{product.productLocation}</span>
-                                                    </div>
+                                        {/* Content Section */}
+                                        <div className="p-5 bg-[#1e293b]/40">
+                                            <h3
+                                                onClick={() => handleViewProduct(product._id)}
+                                                className="text-lg font-bold text-white mb-2 truncate group-hover:text-orange-400 transition-colors cursor-pointer"
+                                            >
+                                                {product.productName}
+                                            </h3>
 
-                                                    {product.productDescription && (
-                                                        <p className="text-gray-400 text-sm line-clamp-2">
-                                                            {product.productDescription}
-                                                        </p>
+                                            <p className="text-2xl font-bold bg-gradient-to-r from-orange-400 to-orange-500 bg-clip-text text-transparent mb-4">
+                                                ₹{product.productPrice?.toLocaleString()}
+                                            </p>
+
+                                            <div className="flex items-center justify-between text-sm text-gray-400 border-t border-slate-700/50 pt-4 mb-4">
+                                                <span className="flex items-center gap-1.5">
+                                                    <MapPin className="w-4 h-4 text-orange-500" />
+                                                    <span className="truncate max-w-[100px]">{product.productLocation || 'N/A'}</span>
+                                                </span>
+                                                <span className="text-xs text-gray-500 bg-[#0f172a]/50 px-2 py-1 rounded-md">
+                                                    {product.createdAt ? new Date(product.createdAt).toLocaleDateString() : 'N/A'}
+                                                </span>
+                                            </div>
+
+                                            {/* Action Buttons */}
+                                            <div className="flex items-center gap-2">
+                                                <button
+                                                    onClick={() => handleViewProduct(product._id)}
+                                                    className="flex-1 py-2 px-3 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-white text-sm font-medium flex items-center justify-center gap-1.5 transition-all"
+                                                >
+                                                    <Eye className="w-4 h-4" />
+                                                    View
+                                                </button>
+                                                <button
+                                                    onClick={() => navigate(`/edit-product/${product._id}`)}
+                                                    className="flex-1 py-2 px-3 rounded-lg bg-orange-500/20 hover:bg-orange-500/30 text-orange-400 border border-orange-500/30 text-sm font-medium flex items-center justify-center gap-1.5 transition-all"
+                                                >
+                                                    <Edit3 className="w-4 h-4" />
+                                                    Edit
+                                                </button>
+                                                <button
+                                                    onClick={() => openDeleteModal(product)}
+                                                    disabled={deletingId === product._id}
+                                                    className="py-2 px-3 rounded-lg bg-red-500/20 hover:bg-red-500/30 text-red-400 border border-red-500/30 transition-all disabled:opacity-50"
+                                                >
+                                                    {deletingId === product._id ? (
+                                                        <div className="w-4 h-4 border-2 border-red-400 border-t-transparent rounded-full animate-spin" />
+                                                    ) : (
+                                                        <Trash2 className="w-4 h-4" />
                                                     )}
-                                                </div>
-
-                                                {/* Actions */}
-                                                <div className="flex items-center gap-3 mt-4">
-                                                    <button
-                                                        onClick={() => handleViewProduct(product._id)}
-                                                        className="flex-1 py-2.5 px-4 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-white font-medium flex items-center justify-center gap-2 transition-all"
-                                                    >
-                                                        <Eye className="w-4 h-4" />
-                                                        View
-                                                    </button>
-                                                    <button
-                                                        onClick={() => navigate(`/edit-product/${product._id}`)}
-                                                        className="flex-1 py-2.5 px-4 rounded-xl bg-purple-500/20 hover:bg-purple-500/30 text-purple-400 border border-purple-500/30 font-medium flex items-center justify-center gap-2 transition-all"
-                                                    >
-                                                        <Edit3 className="w-4 h-4" />
-                                                        Edit
-                                                    </button>
-                                                    <button
-                                                        onClick={() => openDeleteModal(product)}
-                                                        disabled={deletingId === product._id}
-                                                        className="p-2.5 rounded-xl bg-red-500/20 hover:bg-red-500/30 text-red-400 border border-red-500/30 transition-all disabled:opacity-50"
-                                                    >
-                                                        {deletingId === product._id ? (
-                                                            <div className="w-5 h-5 border-2 border-red-400 border-t-transparent rounded-full animate-spin" />
-                                                        ) : (
-                                                            <Trash2 className="w-5 h-5" />
-                                                        )}
-                                                    </button>
-                                                </div>
+                                                </button>
                                             </div>
                                         </div>
                                     </motion.div>
