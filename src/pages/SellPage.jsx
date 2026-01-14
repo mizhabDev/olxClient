@@ -1,5 +1,6 @@
 import React, { useState, useRef } from "react";
-import { Camera, Upload, X, ChevronDown, AlertTriangle } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { Camera, Upload, X, ChevronDown, Loader2 } from "lucide-react";
 import Navbar from "../components/Navbar";
 import axios from "axios";
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
@@ -7,6 +8,7 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 
 const SellPage = () => {
+    const navigate = useNavigate();
     const [productName, setProductName] = useState("");
     const [category, setCategory] = useState("");
     const [description, setDescription] = useState("");
@@ -14,6 +16,8 @@ const SellPage = () => {
     const [location, setLocation] = useState("");
     const [images, setImages] = useState([]);
     const [isCategoryOpen, setIsCategoryOpen] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [error, setError] = useState(null);
     const fileInputRef = useRef(null);
 
     const categories = [
@@ -59,6 +63,8 @@ const SellPage = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setError(null);
+        setIsSubmitting(true);
 
         const formData = new FormData();
 
@@ -84,17 +90,36 @@ const SellPage = () => {
             );
 
             console.log("Product created:", res.data);
+
+            // Get the product ID from response and redirect
+            const productId = res.data.data?._id || res.data.product?._id || res.data._id;
+            if (productId) {
+                navigate(`/add-additional-details/${productId}`);
+            }
         } catch (error) {
             console.error(
                 "Error submitting product:",
                 error.response?.data || error.message
             );
+            setError(error.response?.data?.message || "Failed to create product. Please try again.");
+            setIsSubmitting(false);
         }
     };
 
 
     return (
-        <div className="min-h-screen">
+        <div className="min-h-screen relative">
+            {/* Loading Overlay */}
+            {isSubmitting && (
+                <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center">
+                    <div className="text-center">
+                        <Loader2 className="w-16 h-16 text-orange-500 animate-spin mx-auto mb-4" />
+                        <p className="text-xl text-white font-medium">Creating your listing...</p>
+                        <p className="text-gray-400 text-sm mt-2">Please wait while we upload your product</p>
+                    </div>
+                </div>
+            )}
+
             <Navbar />
 
             <div className="max-w-3xl mx-auto px-4 py-8">

@@ -1,5 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useParams, useNavigate } from 'react-router-dom';
+import axios from 'axios';
 import {
     Smartphone, Laptop, Tv, Camera, Refrigerator,
     Car, Bike, Truck, Home, Building2,
@@ -9,16 +11,26 @@ import {
     Dumbbell, Trophy,
     Wrench, Code, Users,
     Briefcase, Clock,
-    Package, ChevronDown, ChevronRight, Layers, Filter
+    Package, ChevronDown, ChevronRight, Layers, Filter, ArrowLeft, Loader2
 } from 'lucide-react';
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
 import Layout from '../../components/home/Layout';
 
+const BACKEND_URL = import.meta.env.VITE_API_BASE_URL;
+
 const CategoriesPage = () => {
+    const { productId } = useParams();
+    const navigate = useNavigate();
+
+    // Product fetch states
+    const [product, setProduct] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+    const [submitting, setSubmitting] = useState(false);
+
     const [selectedCategory, setSelectedCategory] = useState(null);
     const [selectedSubcategory, setSelectedSubcategory] = useState(null);
-    const [isCategoryOpen, setIsCategoryOpen] = useState(false);
     const [isSubcategoryOpen, setIsSubcategoryOpen] = useState(false);
     const [filters, setFilters] = useState({});
 
@@ -267,12 +279,43 @@ const CategoriesPage = () => {
         }
     ];
 
-    const handleCategorySelect = (category) => {
-        setSelectedCategory(category);
-        setSelectedSubcategory(null);
-        setFilters({});
-        setIsCategoryOpen(false);
-    };
+    // Fetch product on mount
+    useEffect(() => {
+        if (!productId) return;
+
+        const fetchProduct = async () => {
+            try {
+                setLoading(true);
+                setError(null);
+
+                const res = await axios.get(
+                    `${BACKEND_URL}/api/product/${productId}`,
+                    { withCredentials: true }
+                );
+
+                const productData = res.data.data;
+                setProduct(productData);
+
+                // Auto-select category based on product's category
+                const productCategory = productData.productCatogery || productData.productCategory;
+                if (productCategory) {
+                    const matchedCategory = categories.find(
+                        cat => cat.name.toLowerCase() === productCategory.toLowerCase()
+                    );
+                    if (matchedCategory) {
+                        setSelectedCategory(matchedCategory);
+                    }
+                }
+            } catch (err) {
+                setError("Failed to load product details.");
+                console.error(err);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchProduct();
+    }, [productId]);
 
     const handleSubcategorySelect = (subcategory) => {
         setSelectedSubcategory(subcategory);
@@ -284,6 +327,44 @@ const CategoriesPage = () => {
             ...prev,
             [fieldName]: value
         }));
+    };
+
+    const handleSubmit = async () => {
+        try {
+            setSubmitting(true);
+
+            // Transform filters object into array of {key, value} pairs
+            const additionalDetailsArray = Object.entries(filters)
+                .filter(([key, value]) => value !== '' && value !== null && value !== undefined)
+                .map(([key, value]) => ({
+                    key,
+                    value: isNaN(Number(value)) ? value : Number(value)
+                }));
+
+            const payload = {
+                subCategory: selectedSubcategory?.name,
+                additionalDetails: additionalDetailsArray
+            };
+
+            const res = await axios.post(
+                `${BACKEND_URL}/api/product/addAdditionalDetails/${productId}`,
+                payload,
+                { withCredentials: true }
+            );
+
+            console.log('Product updated:', res.data);
+            // Navigate to the product page after successful update
+            navigate(`/product/${productId}`);
+        } catch (err) {
+            console.error('Error updating product:', err);
+            setError('Failed to update product details.');
+        } finally {
+            setSubmitting(false);
+        }
+    };
+
+    const handleBack = () => {
+        navigate(-1);
     };
 
     const renderFilterField = (field) => {
@@ -340,11 +421,71 @@ const CategoriesPage = () => {
 
     const currentCategoryFilters = selectedCategory ? categoryFilters[selectedCategory.id] : null;
 
+    // Loading State
+    if (loading) {
+        return (
+            <>
+                <Navbar />
+                <Layout>
+                    <div className="min-h-[60vh] flex items-center justify-center">
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            className="text-center"
+                        >
+                            <div className="w-16 h-16 border-4 border-purple-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                            <p className="text-xl text-gray-300">Loading product details…</p>
+                        </motion.div>
+                    </div>
+                </Layout>
+                <Footer />
+            </>
+        );
+    }
+
+    // Error State
+    if (error) {
+        return (
+            <>
+                <Navbar />
+                <Layout>
+                    <div className="min-h-[60vh] flex items-center justify-center">
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className="text-center bg-white/5 backdrop-blur-xl border border-white/10 p-8 rounded-3xl"
+                        >
+                            <p className="text-xl text-red-400 mb-4">{error}</p>
+                            <button
+                                onClick={handleBack}
+                                className="px-6 py-3 rounded-xl bg-gradient-to-r from-purple-600 to-blue-600 text-white font-bold"
+                            >
+                                Go Back
+                            </button>
+                        </motion.div>
+                    </div>
+                </Layout>
+                <Footer />
+            </>
+        );
+    }
+
     return (
         <>
             <Navbar />
             <Layout>
                 <div className="min-h-[60vh] py-8">
+                    {/* Back Button */}
+                    <motion.button
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        onClick={handleBack}
+                        className="mb-6 flex items-center gap-2 text-gray-300 hover:text-white transition-colors group"
+                    >
+                        <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
+                        <span className="font-medium">Back</span>
+                    </motion.button>
+
                     {/* Hero Section */}
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
@@ -353,143 +494,119 @@ const CategoriesPage = () => {
                     >
                         <div className="inline-flex items-center gap-2 px-4 py-2 bg-purple-500/10 border border-purple-500/20 rounded-full mb-6">
                             <Layers className="w-4 h-4 text-purple-400" />
-                            <span className="text-purple-400 text-sm font-medium">Browse Categories</span>
+                            <span className="text-purple-400 text-sm font-medium">Add More Details</span>
                         </div>
                         <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6">
-                            Select <span className="bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">Category</span>
+                            Complete Your <span className="bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">Listing</span>
                         </h1>
                         <p className="text-xl text-gray-400 max-w-2xl mx-auto">
-                            Choose a category and subcategory to find exactly what you're looking for.
+                            Add more details about your product to attract more buyers.
                         </p>
                     </motion.div>
 
-                    {/* Dropdowns Container */}
+                    {/* Product Info Card */}
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.1 }}
+                        className="max-w-2xl mx-auto mb-8"
+                    >
+                        <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6">
+                            <div className="flex items-center gap-4">
+                                {product?.productPhotoSrc?.[0] && (
+                                    <img
+                                        src={`${BACKEND_URL}${product.productPhotoSrc[0]}`}
+                                        alt={product.productName}
+                                        className="w-20 h-20 rounded-xl object-cover"
+                                    />
+                                )}
+                                <div className="flex-1">
+                                    <h2 className="text-xl font-bold text-white">{product?.productName}</h2>
+                                    <p className="text-lg text-purple-400 font-semibold">₹{product?.productPrice?.toLocaleString()}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </motion.div>
+
+                    {/* Category Display (Read-only) */}
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.15 }}
                         className="max-w-2xl mx-auto space-y-6"
                     >
-                        {/* Category Dropdown */}
-                        <div className="relative">
-                            <label className="block text-sm font-medium text-gray-400 mb-2">
-                                Select Category
-                            </label>
-                            <button
-                                onClick={() => {
-                                    setIsCategoryOpen(!isCategoryOpen);
-                                    setIsSubcategoryOpen(false);
-                                }}
-                                className="w-full bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl px-5 py-4 flex items-center justify-between hover:bg-white/10 hover:border-white/20 transition-all"
-                            >
-                                {selectedCategory ? (
-                                    <div className="flex items-center gap-3">
-                                        <div className={`w-10 h-10 rounded-lg bg-gradient-to-br ${selectedCategory.color} flex items-center justify-center text-white`}>
-                                            {selectedCategory.icon}
-                                        </div>
-                                        <span className="text-white font-medium">
-                                            {selectedCategory.emoji} {selectedCategory.name}
-                                        </span>
+                        {selectedCategory && (
+                            <div>
+                                <label className="block text-sm font-medium text-gray-400 mb-2">
+                                    Category
+                                </label>
+                                <div className="w-full bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl px-5 py-4 flex items-center gap-3">
+                                    <div className={`w-10 h-10 rounded-lg bg-gradient-to-br ${selectedCategory.color} flex items-center justify-center text-white`}>
+                                        {selectedCategory.icon}
                                     </div>
-                                ) : (
-                                    <span className="text-gray-400">Choose a category...</span>
-                                )}
-                                <ChevronDown className={`w-5 h-5 text-gray-400 transition-transform ${isCategoryOpen ? 'rotate-180' : ''}`} />
-                            </button>
+                                    <span className="text-white font-medium">
+                                        {selectedCategory.emoji} {selectedCategory.name}
+                                    </span>
+                                </div>
+                            </div>
+                        )}
 
-                            {/* Category Dropdown Menu */}
-                            <AnimatePresence>
-                                {isCategoryOpen && (
-                                    <motion.div
-                                        initial={{ opacity: 0, y: -10 }}
-                                        animate={{ opacity: 1, y: 0 }}
-                                        exit={{ opacity: 0, y: -10 }}
-                                        className="absolute top-full left-0 right-0 mt-2 bg-[#0f172a] backdrop-blur-xl border border-white/10 rounded-xl shadow-2xl shadow-black/50 overflow-hidden z-50 max-h-80 overflow-y-auto"
-                                    >
-                                        {categories.map((category) => (
-                                            <button
-                                                key={category.id}
-                                                onClick={() => handleCategorySelect(category)}
-                                                className={`w-full px-5 py-3 flex items-center gap-3 hover:bg-white/10 transition-colors ${selectedCategory?.id === category.id ? 'bg-white/10' : ''}`}
-                                            >
-                                                <div className={`w-10 h-10 rounded-lg bg-gradient-to-br ${category.color} flex items-center justify-center text-white`}>
-                                                    {category.icon}
-                                                </div>
-                                                <span className="text-white font-medium">
-                                                    {category.emoji} {category.name}
-                                                </span>
-                                                <span className="ml-auto text-gray-500 text-sm">
-                                                    {category.subcategories.length} options
-                                                </span>
-                                            </button>
-                                        ))}
-                                    </motion.div>
-                                )}
-                            </AnimatePresence>
-                        </div>
-
-                        {/* Subcategory Dropdown - Only shows when category is selected */}
-                        <AnimatePresence>
-                            {selectedCategory && (
-                                <motion.div
-                                    initial={{ opacity: 0, height: 0 }}
-                                    animate={{ opacity: 1, height: 'auto' }}
-                                    exit={{ opacity: 0, height: 0 }}
-                                    className="relative"
+                        {/* Subcategory Dropdown */}
+                        {selectedCategory && (
+                            <motion.div
+                                initial={{ opacity: 0, height: 0 }}
+                                animate={{ opacity: 1, height: 'auto' }}
+                                className="relative"
+                            >
+                                <label className="block text-sm font-medium text-gray-400 mb-2">
+                                    Select Subcategory in {selectedCategory.name}
+                                </label>
+                                <button
+                                    onClick={() => setIsSubcategoryOpen(!isSubcategoryOpen)}
+                                    className="w-full bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl px-5 py-4 flex items-center justify-between hover:bg-white/10 hover:border-white/20 transition-all"
                                 >
-                                    <label className="block text-sm font-medium text-gray-400 mb-2">
-                                        Select Subcategory in {selectedCategory.name}
-                                    </label>
-                                    <button
-                                        onClick={() => {
-                                            setIsSubcategoryOpen(!isSubcategoryOpen);
-                                            setIsCategoryOpen(false);
-                                        }}
-                                        className="w-full bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl px-5 py-4 flex items-center justify-between hover:bg-white/10 hover:border-white/20 transition-all"
-                                    >
-                                        {selectedSubcategory ? (
-                                            <div className="flex items-center gap-3">
-                                                <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${selectedCategory.color} bg-opacity-50 flex items-center justify-center text-white/80`}>
-                                                    {selectedSubcategory.icon}
-                                                </div>
-                                                <span className="text-white font-medium">{selectedSubcategory.name}</span>
+                                    {selectedSubcategory ? (
+                                        <div className="flex items-center gap-3">
+                                            <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${selectedCategory.color} bg-opacity-50 flex items-center justify-center text-white/80`}>
+                                                {selectedSubcategory.icon}
                                             </div>
-                                        ) : (
-                                            <span className="text-gray-400">Select one of these...</span>
-                                        )}
-                                        <ChevronDown className={`w-5 h-5 text-gray-400 transition-transform ${isSubcategoryOpen ? 'rotate-180' : ''}`} />
-                                    </button>
+                                            <span className="text-white font-medium">{selectedSubcategory.name}</span>
+                                        </div>
+                                    ) : (
+                                        <span className="text-gray-400">Select one of these...</span>
+                                    )}
+                                    <ChevronDown className={`w-5 h-5 text-gray-400 transition-transform ${isSubcategoryOpen ? 'rotate-180' : ''}`} />
+                                </button>
 
-                                    {/* Subcategory Dropdown Menu */}
-                                    <AnimatePresence>
-                                        {isSubcategoryOpen && (
-                                            <motion.div
-                                                initial={{ opacity: 0, y: -10 }}
-                                                animate={{ opacity: 1, y: 0 }}
-                                                exit={{ opacity: 0, y: -10 }}
-                                                className="absolute top-full left-0 right-0 mt-2 bg-[#0f172a] backdrop-blur-xl border border-white/10 rounded-xl shadow-2xl shadow-black/50 overflow-hidden z-50 max-h-80 overflow-y-auto"
-                                            >
-                                                {selectedCategory.subcategories.map((subcat, idx) => (
-                                                    <button
-                                                        key={idx}
-                                                        onClick={() => handleSubcategorySelect(subcat)}
-                                                        className={`w-full px-5 py-3 flex items-center gap-3 hover:bg-white/10 transition-colors ${selectedSubcategory?.name === subcat.name ? 'bg-white/10' : ''}`}
-                                                    >
-                                                        <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${selectedCategory.color} bg-opacity-30 flex items-center justify-center text-white/70`}>
-                                                            {subcat.icon}
-                                                        </div>
-                                                        <span className="text-white">{subcat.name}</span>
-                                                        {subcat.isOther && (
-                                                            <span className="ml-auto text-xs text-gray-500 bg-white/5 px-2 py-1 rounded">Optional</span>
-                                                        )}
-                                                    </button>
-                                                ))}
-                                            </motion.div>
-                                        )}
-                                    </AnimatePresence>
-                                </motion.div>
-                            )}
-                        </AnimatePresence>
+                                {/* Subcategory Dropdown Menu */}
+                                <AnimatePresence>
+                                    {isSubcategoryOpen && (
+                                        <motion.div
+                                            initial={{ opacity: 0, y: -10 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            exit={{ opacity: 0, y: -10 }}
+                                            className="absolute top-full left-0 right-0 mt-2 bg-[#0f172a] backdrop-blur-xl border border-white/10 rounded-xl shadow-2xl shadow-black/50 overflow-hidden z-50 max-h-80 overflow-y-auto"
+                                        >
+                                            {selectedCategory.subcategories.map((subcat, idx) => (
+                                                <button
+                                                    key={idx}
+                                                    onClick={() => handleSubcategorySelect(subcat)}
+                                                    className={`w-full px-5 py-3 flex items-center gap-3 hover:bg-white/10 transition-colors ${selectedSubcategory?.name === subcat.name ? 'bg-white/10' : ''}`}
+                                                >
+                                                    <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${selectedCategory.color} bg-opacity-30 flex items-center justify-center text-white/70`}>
+                                                        {subcat.icon}
+                                                    </div>
+                                                    <span className="text-white">{subcat.name}</span>
+                                                    {subcat.isOther && (
+                                                        <span className="ml-auto text-xs text-gray-500 bg-white/5 px-2 py-1 rounded">Optional</span>
+                                                    )}
+                                                </button>
+                                            ))}
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
+                            </motion.div>
+                        )}
 
                         {/* Dynamic Filters Section */}
                         <AnimatePresence>
@@ -616,6 +733,35 @@ const CategoriesPage = () => {
                             </div>
                         </motion.div>
                     )}
+
+                    {/* Submit Button */}
+                    <AnimatePresence>
+                        {selectedSubcategory && (
+                            <motion.div
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -20 }}
+                                className="max-w-2xl mx-auto mt-8"
+                            >
+                                <motion.button
+                                    whileHover={{ scale: 1.02 }}
+                                    whileTap={{ scale: 0.98 }}
+                                    disabled={submitting}
+                                    className="w-full py-4 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 disabled:from-gray-600 disabled:to-gray-600 text-white font-semibold text-lg rounded-xl shadow-lg shadow-purple-500/25 transition-all duration-300 flex items-center justify-center gap-2"
+                                    onClick={handleSubmit}
+                                >
+                                    {submitting ? (
+                                        <>
+                                            <Loader2 className="w-5 h-5 animate-spin" />
+                                            Saving...
+                                        </>
+                                    ) : (
+                                        'Save Additional Details'
+                                    )}
+                                </motion.button>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
                 </div>
             </Layout>
             <Footer />

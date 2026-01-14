@@ -14,6 +14,14 @@ import {
     ZoomIn,
     Shield,
     X,
+    Tag,
+    Fuel,
+    Gauge,
+    Users,
+    Calendar,
+    Info,
+    CheckCircle2,
+    AlertCircle,
 } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 
@@ -384,6 +392,32 @@ const ProductDetailPage = () => {
                                 </div>
                             </div>
 
+                            {/* Category & Subcategory Badges */}
+                            <div className="flex flex-wrap gap-2 mb-4">
+                                {product?.productCatogery && (
+                                    <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-purple-500/10 border border-purple-500/20 rounded-full text-purple-400 text-sm font-medium">
+                                        <Tag className="w-3.5 h-3.5" />
+                                        {product.productCatogery}
+                                    </span>
+                                )}
+                                {product?.subCategory?.subCategory && (
+                                    <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-500/10 border border-blue-500/20 rounded-full text-blue-400 text-sm font-medium">
+                                        {product.subCategory.subCategory}
+                                    </span>
+                                )}
+                                {product?.isSold ? (
+                                    <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-red-500/10 border border-red-500/20 rounded-full text-red-400 text-sm font-medium">
+                                        <AlertCircle className="w-3.5 h-3.5" />
+                                        Sold
+                                    </span>
+                                ) : (
+                                    <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-green-500/10 border border-green-500/20 rounded-full text-green-400 text-sm font-medium">
+                                        <CheckCircle2 className="w-3.5 h-3.5" />
+                                        Available
+                                    </span>
+                                )}
+                            </div>
+
                             {/* Location & Date */}
                             <div className="space-y-3 mb-4">
                                 <div className="flex items-center gap-3 text-gray-300">
@@ -502,6 +536,69 @@ const ProductDetailPage = () => {
                         {product?.productDescription}
                     </p>
                 </div>
+
+                {/* Additional Details / Specifications */}
+                {product?.subCategory?.additionalDetails && product.subCategory.additionalDetails.length > 0 && (
+                    <div className="rounded-2xl glass-panel border border-white/10 bg-[#0f172a]/40 backdrop-blur-xl p-6">
+                        <div className="flex items-center gap-2 mb-4">
+                            <Info className="w-5 h-5 text-purple-400" />
+                            <h3 className="text-lg font-semibold text-white">Specifications</h3>
+                        </div>
+                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                            {product.subCategory.additionalDetails.map((detail, index) => {
+                                // Get icon based on key
+                                const getIcon = (key) => {
+                                    switch (key.toLowerCase()) {
+                                        case 'fueltype':
+                                            return <Fuel className="w-4 h-4" />;
+                                        case 'kmdriven':
+                                            return <Gauge className="w-4 h-4" />;
+                                        case 'owners':
+                                            return <Users className="w-4 h-4" />;
+                                        case 'year':
+                                            return <Calendar className="w-4 h-4" />;
+                                        default:
+                                            return <Info className="w-4 h-4" />;
+                                    }
+                                };
+
+                                // Format label from camelCase
+                                const formatLabel = (key) => {
+                                    return key
+                                        .replace(/([A-Z])/g, ' $1')
+                                        .replace(/^./, str => str.toUpperCase())
+                                        .trim();
+                                };
+
+                                // Format value
+                                const formatValue = (key, value) => {
+                                    if (key.toLowerCase() === 'kmdriven') {
+                                        return `${Number(value).toLocaleString()} km`;
+                                    }
+                                    if (key.toLowerCase() === 'owners') {
+                                        return value === 1 ? '1st Owner' : `${value} Owners`;
+                                    }
+                                    return value;
+                                };
+
+                                return (
+                                    <div
+                                        key={index}
+                                        className="bg-white/5 border border-white/10 rounded-xl p-4 hover:bg-white/10 transition-colors"
+                                    >
+                                        <div className="flex items-center gap-2 text-gray-400 mb-1">
+                                            {getIcon(detail.key)}
+                                            <span className="text-xs uppercase tracking-wide">{formatLabel(detail.key)}</span>
+                                        </div>
+                                        <p className="text-white font-semibold text-lg">
+                                            {formatValue(detail.key, detail.value)}
+                                        </p>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </div>
+                )}
             </motion.div>
         </div>
     );
