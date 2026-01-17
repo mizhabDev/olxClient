@@ -31,6 +31,7 @@ const CategoriesPage = () => {
 
     const [selectedCategory, setSelectedCategory] = useState(null);
     const [selectedSubcategory, setSelectedSubcategory] = useState(null);
+    const [isCategoryOpen, setIsCategoryOpen] = useState(false);
     const [isSubcategoryOpen, setIsSubcategoryOpen] = useState(false);
     const [filters, setFilters] = useState({});
 
@@ -317,6 +318,13 @@ const CategoriesPage = () => {
         fetchProduct();
     }, [productId]);
 
+    const handleCategorySelect = (category) => {
+        setSelectedCategory(category);
+        setSelectedSubcategory(null); // Reset subcategory when category changes
+        setFilters({}); // Reset filters when category changes
+        setIsCategoryOpen(false);
+    };
+
     const handleSubcategorySelect = (subcategory) => {
         setSelectedSubcategory(subcategory);
         setIsSubcategoryOpen(false);
@@ -515,7 +523,11 @@ const CategoriesPage = () => {
                             <div className="flex items-center gap-4">
                                 {product?.productPhotoSrc?.[0] && (
                                     <img
-                                        src={`${BACKEND_URL}${product.productPhotoSrc[0]}`}
+                                        src={(() => {
+                                            const imgObj = product.productPhotoSrc[0];
+                                            if (!imgObj?.url) return "/placeholder.png";
+                                            return imgObj.url.startsWith("https") ? imgObj.url : `${BACKEND_URL}${imgObj.url}`;
+                                        })()}
                                         alt={product.productName}
                                         className="w-20 h-20 rounded-xl object-cover"
                                     />
@@ -528,28 +540,35 @@ const CategoriesPage = () => {
                         </div>
                     </motion.div>
 
-                    {/* Category Display (Read-only) */}
+                    {/* Category Display (Read-Only) */}
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.15 }}
                         className="max-w-2xl mx-auto space-y-6"
                     >
-                        {selectedCategory && (
-                            <div>
-                                <label className="block text-sm font-medium text-gray-400 mb-2">
-                                    Category
-                                </label>
-                                <div className="w-full bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl px-5 py-4 flex items-center gap-3">
-                                    <div className={`w-10 h-10 rounded-lg bg-gradient-to-br ${selectedCategory.color} flex items-center justify-center text-white`}>
-                                        {selectedCategory.icon}
+                        <div className="relative">
+                            <label className="block text-sm font-medium text-gray-400 mb-2">
+                                Category
+                            </label>
+                            <div
+                                className="w-full bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl px-5 py-4 flex items-center justify-between cursor-not-allowed opacity-80"
+                            >
+                                {selectedCategory ? (
+                                    <div className="flex items-center gap-3">
+                                        <div className={`w-10 h-10 rounded-lg bg-gradient-to-br ${selectedCategory.color} flex items-center justify-center text-white`}>
+                                            {selectedCategory.icon}
+                                        </div>
+                                        <span className="text-white font-medium">
+                                            {selectedCategory.emoji} {selectedCategory.name}
+                                        </span>
                                     </div>
-                                    <span className="text-white font-medium">
-                                        {selectedCategory.emoji} {selectedCategory.name}
-                                    </span>
-                                </div>
+                                ) : (
+                                    <span className="text-gray-400">No category assigned</span>
+                                )}
+                                <span className="text-xs text-gray-500 bg-white/5 px-2 py-1 rounded">Locked</span>
                             </div>
-                        )}
+                        </div>
 
                         {/* Subcategory Dropdown */}
                         {selectedCategory && (

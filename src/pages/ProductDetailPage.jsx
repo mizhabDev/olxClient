@@ -116,7 +116,6 @@ const ProductDetailPage = () => {
     // Keyboard navigation for lightbox
     const handleKeyDown = useCallback((e) => {
         if (!showLightbox) return;
-
         if (e.key === "ArrowRight") nextImage();
         if (e.key === "ArrowLeft") prevImage();
         if (e.key === "Escape") setShowLightbox(false);
@@ -215,6 +214,12 @@ const ProductDetailPage = () => {
     }
 
     const images = product?.productPhotoSrc || [];
+
+    // Helper to get the correct image URL (handles both Cloudinary and local URLs)
+    const getImageUrl = (imgObj) => {
+        if (!imgObj?.url) return "/placeholder.png";
+        return imgObj.url.startsWith("https") ? imgObj.url : `${BACKEND_URL}${imgObj.url}`;
+    };
     const seller = product?.seller || product?.user || null;
 
     return (
@@ -258,7 +263,7 @@ const ProductDetailPage = () => {
                             initial={{ opacity: 0, scale: 0.9 }}
                             animate={{ opacity: 1, scale: 1 }}
                             exit={{ opacity: 0, scale: 0.9 }}
-                            src={`${BACKEND_URL}${images[currentImageIndex]}`}
+                            src={getImageUrl(images[currentImageIndex])}
                             alt={product?.productName}
                             className="max-w-[90vw] max-h-[90vh] object-contain"
                             onClick={(e) => e.stopPropagation()}
@@ -300,11 +305,7 @@ const ProductDetailPage = () => {
                                     initial={{ opacity: 0 }}
                                     animate={{ opacity: 1 }}
                                     transition={{ duration: 0.3 }}
-                                    src={
-                                        images.length > 0
-                                            ? `${BACKEND_URL}${images[currentImageIndex]}`
-                                            : "/placeholder.png"
-                                    }
+                                    src={images.length > 0 ? getImageUrl(images[currentImageIndex]) : "/placeholder.png"}
                                     alt={product?.productName}
                                     className="w-full h-full object-cover cursor-pointer"
                                     onClick={() => images.length > 0 && setShowLightbox(true)}
@@ -519,7 +520,7 @@ const ProductDetailPage = () => {
                                         }`}
                                 >
                                     <img
-                                        src={`${BACKEND_URL}${src}`}
+                                        src={getImageUrl(src)}
                                         alt={`Thumbnail ${index + 1}`}
                                         className="w-full h-full object-cover"
                                     />

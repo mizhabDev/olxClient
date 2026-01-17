@@ -90,7 +90,10 @@ const MyListingsPage = () => {
 
     const getImageSrc = (product) => {
         if (Array.isArray(product.productPhotoSrc) && product.productPhotoSrc.length > 0) {
-            const rawSrc = product.productPhotoSrc[0];
+            const imgObj = product.productPhotoSrc[0];
+            // Handle both object format {url: "..."} and plain string format
+            const rawSrc = typeof imgObj === 'string' ? imgObj : imgObj?.url;
+            if (!rawSrc) return "/placeholder.png";
             return rawSrc.startsWith("http") ? rawSrc : `${BACKEND_URL}${rawSrc}`;
         }
         return "/placeholder.png";

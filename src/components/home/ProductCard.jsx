@@ -8,9 +8,12 @@ export default function ProductCard({ product, onClick }) {
     Array.isArray(product.productPhotoSrc) &&
     product.productPhotoSrc.length > 0
   ) {
-    const rawSrc = product.productPhotoSrc[0];
+    const rawSrc = product.productPhotoSrc[0].url;
 
-    imageSrc = rawSrc.startsWith("http")
+
+    console.log("rawSrc:", rawSrc, "type:", typeof rawSrc);
+
+    imageSrc = rawSrc.startsWith("https")
       ? rawSrc
       : `${BACKEND_URL}${rawSrc}`;
   }

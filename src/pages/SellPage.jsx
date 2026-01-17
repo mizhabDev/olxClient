@@ -77,7 +77,7 @@ const SellPage = () => {
 
         // files
         images.forEach((img) => {
-            formData.append("productImage", img.file);
+            formData.append("productImages", img.file);
         });
 
         try {
